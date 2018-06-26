@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="SL">
+    <output-path>$PROJECT_DIR$/</output-path>
+    <root id="archive" name="SL.jar">
+      <element id="module-output" name="SX-Level" />
+    </root>
+  </artifact>
+</component>
