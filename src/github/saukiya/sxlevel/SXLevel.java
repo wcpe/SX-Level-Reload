@@ -70,7 +70,7 @@ public class SXLevel extends JavaPlugin implements Listener {
     }
 
     public void onDisable() {
-        //
+        PlayerExpDataManager.getPlayerNameMap().values().forEach(PlayerExpData::save);
     }
 
     @Override

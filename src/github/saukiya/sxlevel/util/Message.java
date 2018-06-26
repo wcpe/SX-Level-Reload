@@ -47,6 +47,7 @@ public class Message {
     public static void createMessage() {
         Bukkit.getConsoleSender().sendMessage("[" + SXLevel.getPlugin().getName() + "] §cCreate Message.yml");
         messages = new YamlConfiguration();
+        messages.set(MESSAGE_VERSION, SXLevel.getPlugin().getDescription().getVersion());
         messages.set(PLAYER_EXP, "[ACTIONBAR]&e&lLv.{0}&8 - &7&l[&a&l{1}&7&l/&6&l{2}&7&l] &7&l[{3}&7&l]");
         messages.set(PLAYER_LEVEL_UP, "[TITLE]&e&l&n Level   Up! &r\n&e&lLv.{0} &8&l- &e&lMaxExp:{1}");
         messages.set(PLAYER_MAX_LEVEL, "[ACTIONBAR]&a&l你已经满级了!");
@@ -54,7 +55,6 @@ public class Message {
         messages.set(ADMIN_TAKE_EXP, "&8[&d" + SXLevel.getPlugin().getName() + "&8] &c减少 &6{0}&c 玩家 &6{1} &c经验 &7[&6{2}&7/&6{3}&7]");
         messages.set(ADMIN_SET_EXP, "&8[&d" + SXLevel.getPlugin().getName() + "&8] &c设置 &6{0}&c 玩家经验为: &6{1} &7[&6{2}&7/&6{3}&7]");
         messages.set(ADMIN_SET_LEVEL, "&8[&d" + SXLevel.getPlugin().getName() + "&8] &c设置 &6{0}&c 玩家等级为: &6{1}&c 级");
-        messages.set(MESSAGE_VERSION, SXLevel.getPlugin().getDescription().getVersion());
         messages.set(ADMIN_NO_PER_CMD, "&8[&d" + SXLevel.getPlugin().getName() + "&8] &c你没有权限执行此指令");
         messages.set(ADMIN_NO_CMD, "&8[&d" + SXLevel.getPlugin().getName() + "&8] &c未找到此子指令:{0}");
         messages.set(ADMIN_NO_FORMAT, "&8[&d" + SXLevel.getPlugin().getName() + "&8] &c格式错误!");

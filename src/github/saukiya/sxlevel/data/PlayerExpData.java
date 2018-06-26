@@ -139,6 +139,7 @@ public class PlayerExpData {
                 maxExp = Integer.valueOf(str.split(":")[1].replaceAll("[^0-9]", ""));
             } else {
                 level++;
+                maxExp = Integer.valueOf(str.replaceAll("[^0-9]", ""));
             }
             if (str.contains(" ") && str.split(" ").length > 1) {
                 if (!player.hasPermission(str.split(" ")[1])) {
@@ -194,7 +195,7 @@ public class PlayerExpData {
         yaml.set("Name", this.player.getName());
         yaml.set("Exp", this.exp);
         yaml.set("Level", this.level);
-        File file = new File("plugins" + File.separator + SXLevel.getPlugin().getName() + File.separator + "PlayerExpData" + File.separator + this.player.getName() + ".yml");
+        File file = new File("plugins" + File.separator + SXLevel.getPlugin().getName() + File.separator + "PlayerData" + File.separator + this.player.getName() + ".yml");
         try {
             yaml.save(file);
         } catch (IOException e) {
