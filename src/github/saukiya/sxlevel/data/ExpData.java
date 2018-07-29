@@ -1,12 +1,11 @@
 package github.saukiya.sxlevel.data;
 
 import github.saukiya.sxlevel.SXLevel;
+import github.saukiya.sxlevel.sql.MySQLExecutorService;
 import github.saukiya.sxlevel.util.Config;
 import github.saukiya.sxlevel.util.Message;
 import lombok.Getter;
 import lombok.Setter;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Sound;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -17,14 +16,13 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @author Saukiya
  * @since 2018年5月7日
  */
 
-public class PlayerExpData {
+public class ExpData {
 
     @Getter
     private Player player;
@@ -40,10 +38,35 @@ public class PlayerExpData {
      *
      * @param player
      */
-    PlayerExpData(Player player) {
+    ExpData(Player player) {
         this.player = player;
         YamlConfiguration yaml = new YamlConfiguration();
-        File file = new File("plugins" + File.separator + SXLevel.getPlugin().getName() + File.separator + "PlayerData" + File.separator + this.player.getName() + ".yml");
+        String saveName = Config.dataUseUuidSave ? this.player.getUniqueId().toString() : this.player.getName();
+        if (SXLevel.getMysql() != null) {
+            if (SXLevel.getMysql().isExists(SXLevel.getPlugin().getName().toLowerCase(), "name", saveName)) {
+                Object object = SXLevel.getMysql().getValue(SXLevel.getPlugin().getName().toLowerCase(), "name", saveName, "date");
+                try {
+                    yaml.loadFromString(object.toString());
+                } catch (InvalidConfigurationException e) {
+                    e.printStackTrace();
+                }
+            }
+        }else {
+            File file = new File("plugins" + File.separator + SXLevel.getPlugin().getName() + File.separator + "PlayerData" + File.separator + saveName + ".yml");
+            if (file.exists()) {
+                try {
+                    yaml.load(file);
+                } catch (IOException | InvalidConfigurationException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        this.level = yaml.getInt("Level");
+        this.exp = yaml.getInt("Exp");
+    }
+
+    public ExpData(File file){
+        YamlConfiguration yaml = new YamlConfiguration();
         if (file.exists()) {
             try {
                 yaml.load(file);
@@ -78,7 +101,6 @@ public class PlayerExpData {
         while (takeExp > 0){
             if(this.level <= 0 && takeExp > this.exp){
                 this.exp = 0;
-                takeExp = 0;
                 Message.send(player,Message.PLAYER_EXP,this.getExp(),this.getMaxExp(),this.level,"§c§l-"+change);
                 return false;
             }
@@ -96,7 +118,7 @@ public class PlayerExpData {
     }
 
     public void addExp(int addExp) {
-        if (this.getMaxLevel() == this.level) {
+        if (this.getMaxLevel() <= this.level) {
             Message.send(player,Message.PLAYER_MAX_LEVEL);
             return;
         }
@@ -112,7 +134,6 @@ public class PlayerExpData {
                 this.setExp(0);
                 this.setLevel(this.getLevel() + 1);
                 levelUp = true;
-                this.save();
             } else {
                 this.setExp(this.getExp() + addExp);
                 addExp = 0;
@@ -122,6 +143,7 @@ public class PlayerExpData {
         if(!levelUp){
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP,change/50f,change/20f);
         }else {
+            MySQLExecutorService.getThread().execute(()->this.save());
             Message.send(player,Message.PLAYER_LEVEL_UP,this.level,this.getMaxExp());
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP,change/20f,change/20f);
         }
@@ -129,10 +151,10 @@ public class PlayerExpData {
 
     public int getMaxExp() {
         List<String> expList = Config.getConfig().getStringList(Config.EXP_LIST);
-        int maxExp = 0, level = -1;
-        if (this.getMaxLevel() == this.level) {
+        if (this.getMaxLevel() <= this.level) {
             return 0;
         }
+        int maxExp = 0, level = -1;
         for (String str : expList) {
             if (str.contains(":") && str.split(":").length > 1) {
                 level = Integer.valueOf(str.split(":")[0].replaceAll("[^0-9]", ""));
@@ -190,16 +212,25 @@ public class PlayerExpData {
      *
      * @return playerData 返回自己
      */
-    public PlayerExpData save() {
+    public ExpData save() {
         YamlConfiguration yaml = new YamlConfiguration();
         yaml.set("Name", this.player.getName());
         yaml.set("Exp", this.exp);
         yaml.set("Level", this.level);
-        File file = new File("plugins" + File.separator + SXLevel.getPlugin().getName() + File.separator + "PlayerData" + File.separator + this.player.getName() + ".yml");
-        try {
-            yaml.save(file);
-        } catch (IOException e) {
-            e.printStackTrace();
+        String saveName = Config.dataUseUuidSave ? this.player.getUniqueId().toString() : this.player.getName();
+        if (SXLevel.getMysql() != null) {
+            if (SXLevel.getMysql().isExists(SXLevel.getPlugin().getName().toLowerCase(), "name", saveName)) {
+                SXLevel.getMysql().intoValue(SXLevel.getPlugin().getName().toLowerCase(), saveName, yaml.saveToString());
+            }else {
+                SXLevel.getMysql().setValue(SXLevel.getPlugin().getName().toLowerCase(), "name", saveName, "date", yaml.saveToString());
+            }
+        } else {
+            File file = new File("plugins" + File.separator + SXLevel.getPlugin().getName() + File.separator + "PlayerData" + File.separator + saveName + ".yml");
+            try {
+                yaml.save(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return this;
     }

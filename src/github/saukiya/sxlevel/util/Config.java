@@ -12,9 +12,21 @@ import java.util.Arrays;
 
 public class Config {
     final public static String CONFIG_VERSION = "ConfigVersion";
+    final public static String SQL_ENABLED = "SQL.Enabled";
+    final public static String SQL_DATABASE_NAME = "SQL.DataBaseName";
+    final public static String SQL_HOST = "SQL.Host";
+    final public static String SQL_PORT = "SQL.Port";
+    final public static String SQL_USER = "SQL.User";
+    final public static String SQL_PASSWORD = "SQL.Password";
+    final public static String AUTO_SAVE_TICK = "AutoSaveTick";
+    final public static String DATA_USE_UUID_SAVE = "DataUseUUIDSave";
+    final public static String DISABLED_DEFAULT_EXP_CHANGE = "DisabledDefaultExpChange";
     final public static String DEFAULT_EXP_ENABLED = "DefaultExp.Enabled";
     final public static String DEFAULT_EXP_VALUE = "DefaultExp.Value";
     final public static String EXP_LIST = "ExpList";
+
+    public static Boolean dataUseUuidSave = false;
+    public static Boolean disabledDefaultExpChange = false;
 
     final private static File FILE = new File("plugins" + File.separator + SXLevel.getPlugin().getName() + File.separator + "Config.yml");
     @Getter
@@ -24,6 +36,15 @@ public class Config {
         Bukkit.getConsoleSender().sendMessage("[" + SXLevel.getPlugin().getName() + "] §cCreate Config.yml");
         config = new YamlConfiguration();
         config.set(CONFIG_VERSION, SXLevel.getPlugin().getDescription().getVersion());
+        config.set(SQL_ENABLED, false);
+        config.set(SQL_DATABASE_NAME, "null");
+        config.set(SQL_HOST, "127.0.0.1");
+        config.set(SQL_PORT, 3306);
+        config.set(SQL_USER, "root");
+        config.set(SQL_PASSWORD, "password");
+        config.set(AUTO_SAVE_TICK, 6000);
+        config.set(DATA_USE_UUID_SAVE, false);
+        config.set(DISABLED_DEFAULT_EXP_CHANGE, false);
         config.set(DEFAULT_EXP_ENABLED, true);
         config.set(DEFAULT_EXP_VALUE, 0.7);
         config.set(EXP_LIST, Arrays.asList("5:500", "10:1000", "20:2000 permission.abc", "25:3000"));
@@ -52,5 +73,7 @@ public class Config {
             e.printStackTrace();
             Bukkit.getConsoleSender().sendMessage("[" + SXLevel.getPlugin().getName() + "] §c读取config时发生错误");
         }
+        dataUseUuidSave = config.getBoolean(Config.DATA_USE_UUID_SAVE);
+        disabledDefaultExpChange = config.getBoolean(Config.DISABLED_DEFAULT_EXP_CHANGE);
     }
 }

@@ -1,10 +1,12 @@
 package github.saukiya.sxlevel.util;
 
 import github.saukiya.sxlevel.SXLevel;
-import github.saukiya.sxlevel.data.PlayerExpDataManager;
-import github.saukiya.sxlevel.data.PlayerExpData;
+import github.saukiya.sxlevel.data.ExpData;
+import github.saukiya.sxlevel.data.ExpDataManager;
 import me.clip.placeholderapi.external.EZPlaceholderHook;
 import org.bukkit.entity.Player;
+
+import java.text.DecimalFormat;
 
 public class Placeholders extends EZPlaceholderHook {
 
@@ -18,18 +20,25 @@ public class Placeholders extends EZPlaceholderHook {
 
     @Override
     public String onPlaceholderRequest(Player player, String string) {
-        int i = -1;
-        PlayerExpData playerData = PlayerExpDataManager.getPlayerData(player);
+        DecimalFormat df = new DecimalFormat("#.##");
+        double d = 0;
+        ExpData playerData = ExpDataManager.getPlayerData(player);
         if (string.equalsIgnoreCase("exp")) {
-            i = playerData.getExp();
+            d = playerData.getExp();
+        } else if (string.equalsIgnoreCase("expPercentage")) {
+            if(playerData.getMaxExp() != 0){
+                d = playerData.getExp()/playerData.getMaxExp();
+            }
         } else if (string.equalsIgnoreCase("maxExp")) {
-            i = playerData.getMaxExp();
+            d = playerData.getMaxExp();
         } else if (string.equalsIgnoreCase("level")) {
-            i = playerData.getLevel();
+            d = playerData.getLevel();
         } else if (string.equalsIgnoreCase("maxLevel")) {
-            i = playerData.getMaxLevel();
+            d = playerData.getMaxLevel();
+        } else {
+            return "§c变量列表: exp/expPercentage/maxExp/level/maxLevel";
         }
-        return String.valueOf(i);
+        return df.format(d);
     }
 
 }

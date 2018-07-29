@@ -39,6 +39,7 @@ public class Message {
     final public static String COMMAND_ADD = "Command.add";
     final public static String COMMAND_TAKE = "Command.take";
     final public static String COMMAND_SET = "Command.set";
+    final public static String COMMAND_UPDATE = "Command.updateLocalDataToSql";
     final public static String COMMAND_RELOAD = "Command.reload";
     final private static File FILE = new File("plugins" + File.separator + SXLevel.getPlugin().getName() + File.separator + "Message.yml");
     @Getter
@@ -65,6 +66,7 @@ public class Message {
         messages.set(COMMAND_ADD, "增长玩家的经验");
         messages.set(COMMAND_TAKE, "减少玩家的经验");
         messages.set(COMMAND_SET, "设置玩家的等级/经验");
+        messages.set(COMMAND_UPDATE, "将本地经验数据上传到SQL");
         messages.set(COMMAND_RELOAD, "重新加载这个插件的配置");
         try {
             messages.save(FILE);

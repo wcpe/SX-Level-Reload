@@ -1,23 +1,29 @@
 package github.saukiya.sxlevel;
 
-import github.saukiya.sxlevel.data.PlayerExpDataManager;
-import github.saukiya.sxlevel.data.PlayerExpData;
+import github.saukiya.sxlevel.data.ExpData;
+import github.saukiya.sxlevel.data.ExpDataManager;
 import github.saukiya.sxlevel.listener.OnListener;
 import github.saukiya.sxlevel.listener.OnMythicmobsDeathListener;
+import github.saukiya.sxlevel.sql.MySQLConnection;
+import github.saukiya.sxlevel.sql.MySQLExecutorService;
 import github.saukiya.sxlevel.util.*;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.IntStream;
 
 
@@ -27,7 +33,10 @@ public class SXLevel extends JavaPlugin implements Listener {
     private static int[] serverSplit = null;
     @Getter
     private static JavaPlugin plugin;
-    private static List<String> commandList = new ArrayList<>();
+    @Getter
+    private static Map<PlayerCommand,Method> commandMap = new HashMap<>();
+    @Getter
+    private static MySQLConnection mysql = null;
 
 
     public void onEnable() {
@@ -40,14 +49,8 @@ public class SXLevel extends JavaPlugin implements Listener {
         for (int i = 0; i < serverStringSplit.length; i++) {
             serverSplit[i] = Integer.valueOf(serverStringSplit[i]);
         }
-        // 获取指令
-        for (String command : this.getDescription().getCommands().keySet()) {
-            commandList.add(command);
-            for (String key : this.getDescription().getCommands().get(command).keySet()) {
-                if (key.equals("aliases")) {
-                    commandList.addAll((List<String>) this.getDescription().getCommands().get(command).get(key));
-                }
-            }
+        if (this.getDescription().getCommands().keySet().size() == 0) {
+            this.getDescription().getCommands().keySet().add(this.getName().toLowerCase());
         }
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new OnListener(), this);
@@ -64,67 +67,89 @@ public class SXLevel extends JavaPlugin implements Listener {
         }
         Config.loadConfig();
         Message.loadMessage();
-        PlayerExpDataManager.autoSave();
+        MySQLExecutorService.setupExecutorService();
+
+        if (Config.getConfig().getBoolean(Config.SQL_ENABLED)) {
+            MySQLExecutorService.getThread().execute(() -> {
+                mysql = new MySQLConnection();
+                if (!mysql.isConnection()) {
+                    Bukkit.getConsoleSender().sendMessage("[" + this.getName() + "] §c未成功连接数据库 插件关闭!");
+                    this.setEnabled(false);
+                    return;
+                }
+                if (!mysql.isExists(getPlugin().getName().toLowerCase())) {
+                    mysql.createTable(getPlugin().getName().toLowerCase(), "name", "date");
+                }
+            });
+        }
+        ExpDataManager.autoSave();;
+        // 获取指令
+        for (Method method : this.getClass().getDeclaredMethods()) {
+            if (method.isAnnotationPresent(PlayerCommand.class)) {
+                commandMap.put(method.getAnnotation(PlayerCommand.class),method);
+            }
+        }
+        Bukkit.getConsoleSender().sendMessage("[" + this.getName() + "] Load "+ commandMap.size() + " Commands");
         Bukkit.getConsoleSender().sendMessage("[" + this.getName() + "] 加载用时: §c" + (System.currentTimeMillis() - oldTimes) + "§7 毫秒");
         Bukkit.getConsoleSender().sendMessage("[" + this.getName() + "] §c加载成功! 插件作者: Saukiya 联系: 1940208750");
     }
 
     public void onDisable() {
-        PlayerExpDataManager.getPlayerNameMap().values().forEach(PlayerExpData::save);
+        ExpDataManager.getPlayerNameMap().values().forEach(ExpData::save);
+        if(mysql != null){
+            mysql.closeConnection();
+        }
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command arg1, String label, String[] args) {
-        if (commandList.contains(label)) {
-            CommandType type = CommandType.CONSOLE;
-            //判断是否是玩家
-            if (sender instanceof Player) {
-                //判断是否有权限
-                if (!sender.hasPermission(this.getName() + ".use")) {
-                    sender.sendMessage(Message.getMsg(Message.ADMIN_NO_PER_CMD));
-                    return true;
-                }
-                type = CommandType.PLAYER;
-            }
-            //无参数
-            if (args.length == 0) {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&0-&8 --&7 ---&c ----&4 -----&b " + this.getName() + "&4 -----&c ----&7 ---&8 --&0 - &0Author Saukiya"));
-                String color = "&7";
-                for (java.lang.reflect.Method method : this.getClass().getDeclaredMethods()) {
-                    if (!method.isAnnotationPresent(PlayerCommand.class)) {
-                        continue;
-                    }
-                    PlayerCommand sub = method.getAnnotation(PlayerCommand.class);
-                    if (contains(sub.type(), type) && sender.hasPermission(this.getName() + "." + sub.cmd())) {
-                        color = color.equals("&7") ? "" : "&7";
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', MessageFormat.format(color + "/{0} {1}{2}&7 -&c {3}", label, sub.cmd(), sub.arg(), Message.getMsg("Command." + sub.cmd()))));
-                    }
-                }
+        CommandType type = CommandType.CONSOLE;
+        //判断是否是玩家
+        if (sender instanceof Player) {
+            //判断是否有权限
+            if (!sender.hasPermission(this.getName() + ".use")) {
+                sender.sendMessage(Message.getMsg(Message.ADMIN_NO_PER_CMD));
                 return true;
             }
+            type = CommandType.PLAYER;
+        }
+        //无参数
+        if (args.length == 0) {
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&0-&8 --&7 ---&c ----&4 -----&b " + this.getName() + "&4 -----&c ----&7 ---&8 --&0 - &0Author Saukiya"));
+            String color = "&7";
             for (java.lang.reflect.Method method : this.getClass().getDeclaredMethods()) {
                 if (!method.isAnnotationPresent(PlayerCommand.class)) {
                     continue;
                 }
                 PlayerCommand sub = method.getAnnotation(PlayerCommand.class);
-                if (!sub.cmd().equalsIgnoreCase(args[0])) {
-                    continue;
+                if (contains(sub.type(), type) && sender.hasPermission(this.getName() + "." + sub.cmd())) {
+                    color = color.equals("&7") ? "" : "&7";
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', MessageFormat.format(color + "/{0} {1}{2}&7 -&c {3}", label, sub.cmd(), sub.arg(), Message.getMsg("Command." + sub.cmd()))));
                 }
-                if (!contains(sub.type(), type) || !sender.hasPermission(this.getName() + "." + args[0])) {
-                    sender.sendMessage(Message.getMsg(Message.ADMIN_NO_PER_CMD));
-                    return true;
-                }
-                try {
-                    method.invoke(this, sender, args);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
-                }
-                return true;
             }
-            sender.sendMessage(Message.getMsg(Message.ADMIN_NO_CMD, args[0]));
             return true;
         }
-        return false;
+        for (java.lang.reflect.Method method : this.getClass().getDeclaredMethods()) {
+            if (!method.isAnnotationPresent(PlayerCommand.class)) {
+                continue;
+            }
+            PlayerCommand sub = method.getAnnotation(PlayerCommand.class);
+            if (!sub.cmd().equalsIgnoreCase(args[0])) {
+                continue;
+            }
+            if (!contains(sub.type(), type) || !sender.hasPermission(this.getName() + "." + args[0])) {
+                sender.sendMessage(Message.getMsg(Message.ADMIN_NO_PER_CMD));
+                return true;
+            }
+            try {
+                method.invoke(this, sender, args);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+            return true;
+        }
+        sender.sendMessage(Message.getMsg(Message.ADMIN_NO_CMD, args[0]));
+        return true;
     }
 
     private boolean contains(CommandType[] type1, CommandType type2) {
@@ -142,10 +167,10 @@ public class SXLevel extends JavaPlugin implements Listener {
             sender.sendMessage(Message.getMsg(Message.ADMIN_NO_ONLINE));
             return;
         }
-        PlayerExpData playerData = PlayerExpDataManager.getPlayerData(player);
+        ExpData playerData = ExpDataManager.getPlayerData(player);
         int addExp = Integer.valueOf(args[2].replaceAll("[^0-9]", ""));
         playerData.addExp(addExp);
-        playerData.save();
+        // 为了防止腐竹经常使用该指令，不在这里插入playerData.save();
         sender.sendMessage(Message.getMsg(Message.ADMIN_ADD_EXP, player.getName(), String.valueOf(addExp), String.valueOf(playerData.getExp()), String.valueOf(playerData.getMaxExp())));
     }
 
@@ -160,10 +185,10 @@ public class SXLevel extends JavaPlugin implements Listener {
             sender.sendMessage(Message.getMsg(Message.ADMIN_NO_ONLINE));
             return;
         }
-        PlayerExpData playerData = PlayerExpDataManager.getPlayerData(player);
+        ExpData playerData = ExpDataManager.getPlayerData(player);
         int takeExp = Integer.valueOf(args[2].replaceAll("[^0-9]", ""));
         playerData.takeExp(takeExp);
-        playerData.save();
+        // 为了防止腐竹经常使用该指令，不在这里插入playerData.save();
         sender.sendMessage(Message.getMsg(Message.ADMIN_TAKE_EXP, player.getName(), String.valueOf(takeExp), String.valueOf(playerData.getExp()), String.valueOf(playerData.getMaxExp())));
     }
 
@@ -178,7 +203,7 @@ public class SXLevel extends JavaPlugin implements Listener {
             sender.sendMessage(Message.getMsg(Message.ADMIN_NO_ONLINE));
             return;
         }
-        PlayerExpData playerData = PlayerExpDataManager.getPlayerData(player);
+        ExpData playerData = ExpDataManager.getPlayerData(player);
         if (args[2].toLowerCase().contains("l")) {
             int level = Integer.valueOf(args[2].replaceAll("[^0-9]", ""));
             playerData.setLevel(level);
@@ -193,7 +218,23 @@ public class SXLevel extends JavaPlugin implements Listener {
             playerData.setExp(exp);
             sender.sendMessage(Message.getMsg(Message.ADMIN_SET_EXP, player.getName(), String.valueOf(exp), String.valueOf(playerData.getExp()), String.valueOf(playerData.getMaxExp())));
         }
-        playerData.save();
+        MySQLExecutorService.getThread().execute(playerData::save);
+    }
+
+    @PlayerCommand(cmd = "updateLocalDataToSql")
+    void onUpdateSQLCommand(CommandSender sender, String args[]) {
+        if(mysql != null){
+            File files = new File("plugins" + File.separator + SXLevel.getPlugin().getName() + File.separator + "PlayerData");
+            if(files.isDirectory()){
+                for (File file : Objects.requireNonNull(files.listFiles())) {
+                    ExpData expData = new ExpData(file);
+                    MySQLExecutorService.getThread().execute(expData::save);
+                }
+            }
+            Bukkit.getConsoleSender().sendMessage("[" + this.getName() + "] §c上传了 §4"+files.listFiles().length+" §c份本地数据到SQL");
+        }else {
+            Bukkit.getConsoleSender().sendMessage("[" + this.getName() + "] §c你没有开启或连接SQL");
+        }
     }
 
     @PlayerCommand(cmd = "reload")
