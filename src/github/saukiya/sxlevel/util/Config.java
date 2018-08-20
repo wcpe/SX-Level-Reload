@@ -11,30 +11,33 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class Config {
-    final public static String CONFIG_VERSION = "ConfigVersion";
-    final public static String SQL_ENABLED = "SQL.Enabled";
-    final public static String SQL_DATABASE_NAME = "SQL.DataBaseName";
-    final public static String SQL_HOST = "SQL.Host";
-    final public static String SQL_PORT = "SQL.Port";
-    final public static String SQL_USER = "SQL.User";
-    final public static String SQL_PASSWORD = "SQL.Password";
-    final public static String AUTO_SAVE_TICK = "AutoSaveTick";
-    final public static String DATA_USE_UUID_SAVE = "DataUseUUIDSave";
-    final public static String DISABLED_DEFAULT_EXP_CHANGE = "DisabledDefaultExpChange";
-    final public static String DEFAULT_EXP_ENABLED = "DefaultExp.Enabled";
-    final public static String DEFAULT_EXP_VALUE = "DefaultExp.Value";
-    final public static String EXP_LIST = "ExpList";
-
-    public static Boolean dataUseUuidSave = false;
-    public static Boolean disabledDefaultExpChange = false;
-
-    final private static File FILE = new File("plugins" + File.separator + SXLevel.getPlugin().getName() + File.separator + "Config.yml");
+    public static final String CONFIG_VERSION = "ConfigVersion";
+    public static final String SQL_ENABLED = "SQL.Enabled";
+    public static final String SQL_DATABASE_NAME = "SQL.DataBaseName";
+    public static final String SQL_HOST = "SQL.Host";
+    public static final String SQL_PORT = "SQL.Port";
+    public static final String SQL_USER = "SQL.User";
+    public static final String SQL_PASSWORD = "SQL.Password";
+    public static final String AUTO_SAVE_TICK = "AutoSaveTick";
+    public static final String DATA_USE_UUID_SAVE = "DataUseUUIDSave";
+    public static final String SX_LEVEL_SET_DEFAULT_EXP = "SXLevelSetDefaultExp";
+    public static final String DISABLED_DEFAULT_EXP_CHANGE = "DisabledDefaultExpChange";
+    public static final String DEFAULT_EXP_ENABLED = "DefaultExp.Enabled";
+    public static final String DEFAULT_EXP_VALUE = "DefaultExp.Value";
+    public static final String EXP_LIST = "ExpList";
+    private static final File FILE = new File(SXLevel.getPlugin().getDataFolder(), "Config.yml");
+    @Getter
+    private static boolean sql = false;
+    @Getter
+    private static Boolean dataUseUuidSave = false;
+    @Getter
+    private static Boolean sxLevelSetDefaultExp = false;
+    @Getter
+    private static Boolean disabledDefaultExpChange = false;
     @Getter
     private static YamlConfiguration config;
 
-    private static void createConfig() {
-        Bukkit.getConsoleSender().sendMessage("[" + SXLevel.getPlugin().getName() + "] §cCreate Config.yml");
-        config = new YamlConfiguration();
+    private static void createDefaultConfig() {
         config.set(CONFIG_VERSION, SXLevel.getPlugin().getDescription().getVersion());
         config.set(SQL_ENABLED, false);
         config.set(SQL_DATABASE_NAME, "null");
@@ -44,36 +47,47 @@ public class Config {
         config.set(SQL_PASSWORD, "password");
         config.set(AUTO_SAVE_TICK, 6000);
         config.set(DATA_USE_UUID_SAVE, false);
+        config.set(SX_LEVEL_SET_DEFAULT_EXP, false);
         config.set(DISABLED_DEFAULT_EXP_CHANGE, false);
         config.set(DEFAULT_EXP_ENABLED, true);
         config.set(DEFAULT_EXP_VALUE, 0.7);
         config.set(EXP_LIST, Arrays.asList("5:500", "10:1000", "20:2000 permission.abc", "25:3000"));
-
-        try {
-            config.save(FILE);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
-    public static void loadConfig() {
-        //检测Config.yml是否存在
-        if (!FILE.exists()) {
-            //创建Config.yml
-            createConfig();
-            return;
-        } else {
-            Bukkit.getConsoleSender().sendMessage("[" + SXLevel.getPlugin().getName() + "] Find Config.yml");
+    /**
+     * 检查版本更新
+     *
+     * @return boolean
+     * @throws IOException IOException
+     */
+    private static boolean detectionVersion() throws IOException {
+        if (!config.getString(CONFIG_VERSION, "").equals(SXLevel.getPlugin().getDescription().getVersion())) {
+            config.save(new File(FILE.toString().replace(".yml", "_" + config.getString(CONFIG_VERSION) + ".yml")));
+            config = new YamlConfiguration();
+            createDefaultConfig();
+            return true;
         }
+        return false;
+    }
+
+    public static void loadConfig() throws IOException, InvalidConfigurationException {
         config = new YamlConfiguration();
-        //读取config并存储
-        try {
+        if (!FILE.exists()) {
+            Bukkit.getConsoleSender().sendMessage(Message.getMessagePrefix() + "§cCreate Config.yml");
+            createDefaultConfig();
+            config.save(FILE);
+        } else {
             config.load(FILE);
-        } catch (IOException | InvalidConfigurationException e) {
-            e.printStackTrace();
-            Bukkit.getConsoleSender().sendMessage("[" + SXLevel.getPlugin().getName() + "] §c读取config时发生错误");
+            if (detectionVersion()) {
+                config.save(FILE);
+                Bukkit.getConsoleSender().sendMessage(Message.getMessagePrefix() + "§eUpdate Config.yml");
+            } else {
+                Bukkit.getConsoleSender().sendMessage(Message.getMessagePrefix() + "Find Config.yml");
+            }
         }
-        dataUseUuidSave = config.getBoolean(Config.DATA_USE_UUID_SAVE);
-        disabledDefaultExpChange = config.getBoolean(Config.DISABLED_DEFAULT_EXP_CHANGE);
+        sql = config.getBoolean(SQL_ENABLED);
+        dataUseUuidSave = config.getBoolean(DATA_USE_UUID_SAVE);
+        sxLevelSetDefaultExp = config.getBoolean(SX_LEVEL_SET_DEFAULT_EXP);
+        disabledDefaultExpChange = config.getBoolean(DISABLED_DEFAULT_EXP_CHANGE);
     }
 }

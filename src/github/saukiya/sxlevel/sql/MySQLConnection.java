@@ -9,6 +9,7 @@ import github.saukiya.sxlevel.SXLevel;
 import github.saukiya.sxlevel.util.Config;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 
 import java.sql.*;
 import java.util.*;
@@ -681,7 +682,7 @@ public class MySQLConnection {
     }
 
     public void print(String message) {
-        System.out.println("[" + SXLevel.getPlugin().getName() + "] §c" + message);
+        Bukkit.getConsoleSender().sendMessage("[" + SXLevel.getPlugin().getName() + "] §c" + message);
     }
 
     /**

@@ -9,22 +9,19 @@ import org.bukkit.event.HandlerList;
  * @author Saukiya
  * @since ${date}
  */
-public class SXExpChangeEvent extends Event {
+public class SXLevelUpEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
     private final Player player;
 
     private final ExpData expData;
-    private final ChangeType type;
-    private int amount;
+
     private boolean Cancelled = false;
 
-    public SXExpChangeEvent(Player player, ExpData expData, int amount, ChangeType type) {
+    public SXLevelUpEvent(Player player, ExpData expData) {
         this.player = player;
         this.expData = expData;
-        this.amount = amount;
-        this.type = type;
     }
 
     public static HandlerList getHandlerList() {
@@ -38,26 +35,6 @@ public class SXExpChangeEvent extends Event {
 
     public Player getPlayer() {
         return player;
-    }
-
-    public int getAmount() {
-        return amount;
-    }
-
-    public void setAmount(int amount) {
-        this.amount = amount;
-    }
-
-    public ChangeType getType() {
-        return type;
-    }
-
-    public boolean isCancelled() {
-        return Cancelled;
-    }
-
-    public void setCancelled(boolean cancelled) {
-        Cancelled = cancelled;
     }
 
     public ExpData getExpData() {

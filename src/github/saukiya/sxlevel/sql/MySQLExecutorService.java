@@ -4,8 +4,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * @author Saukiya
- * @since 2018年5月9日
+ * @author Bkm016
+ * @since 复制日期: 2018年5月8日
  */
 
 public class MySQLExecutorService {

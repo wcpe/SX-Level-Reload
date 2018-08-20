@@ -2,7 +2,6 @@ package github.saukiya.sxlevel.listener;
 
 import github.saukiya.sxlevel.SXLevel;
 import github.saukiya.sxlevel.data.ExpData;
-import github.saukiya.sxlevel.data.ExpDataManager;
 import github.saukiya.sxlevel.event.ChangeType;
 import github.saukiya.sxlevel.event.SXExpChangeEvent;
 import io.lumine.xikage.mythicmobs.api.bukkit.events.MythicMobDeathEvent;
@@ -21,6 +20,12 @@ import java.util.Random;
  */
 
 public class OnMythicmobsDeathListener implements Listener {
+
+    private final SXLevel plugin;
+
+    public OnMythicmobsDeathListener(SXLevel plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler
     void onMythicMobDeathEvent(MythicMobDeathEvent event) {
@@ -48,10 +53,10 @@ public class OnMythicmobsDeathListener implements Listener {
                                 addExp = Integer.valueOf(args[1].replaceAll("[^0-9]", ""));
                             }
                         }
-                        ExpData playerData = ExpDataManager.getPlayerData((Player) event.getKiller());
-                        SXExpChangeEvent sxExpChangeEvent = new SXExpChangeEvent((Player) event.getKiller(), playerData, addExp,ChangeType.ADD);
+                        ExpData playerData = plugin.getExpDataManager().getPlayerData((Player) event.getKiller());
+                        SXExpChangeEvent sxExpChangeEvent = new SXExpChangeEvent((Player) event.getKiller(), playerData, addExp, ChangeType.ADD);
                         Bukkit.getPluginManager().callEvent(sxExpChangeEvent);
-                        if(!sxExpChangeEvent.isCancelled()){
+                        if (!sxExpChangeEvent.isCancelled()) {
                             playerData.addExp(sxExpChangeEvent.getAmount());
                         }
                     }
