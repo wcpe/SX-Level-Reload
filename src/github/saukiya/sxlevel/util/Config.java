@@ -13,6 +13,7 @@ import java.util.Arrays;
 public class Config {
     public static final String CONFIG_VERSION = "ConfigVersion";
     public static final String SQL_ENABLED = "SQL.Enabled";
+    public static final String SQL_JOIN_DELAY = "SQL.JoinDelay";
     public static final String SQL_DATABASE_NAME = "SQL.DataBaseName";
     public static final String SQL_HOST = "SQL.Host";
     public static final String SQL_PORT = "SQL.Port";
@@ -40,6 +41,7 @@ public class Config {
     private static void createDefaultConfig() {
         config.set(CONFIG_VERSION, SXLevel.getPlugin().getDescription().getVersion());
         config.set(SQL_ENABLED, false);
+        config.set(SQL_JOIN_DELAY,4000);
         config.set(SQL_DATABASE_NAME, "null");
         config.set(SQL_HOST, "127.0.0.1");
         config.set(SQL_PORT, 3306);

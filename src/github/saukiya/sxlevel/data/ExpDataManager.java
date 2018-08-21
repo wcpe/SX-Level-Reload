@@ -31,7 +31,7 @@ public class ExpDataManager {
     /**
      * 定时保存玩家数据
      */
-    public void autoSave() {
+    private void autoSave() {
         new BukkitRunnable() {
             @Override
             public void run() {

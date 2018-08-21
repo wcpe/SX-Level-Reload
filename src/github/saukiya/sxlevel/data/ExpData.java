@@ -25,8 +25,6 @@ import java.util.List;
 public class ExpData {
 
     @Getter
-    private Player player;
-    @Getter
     @Setter
     private int level;
     @Getter
@@ -35,6 +33,9 @@ public class ExpData {
 
     private SXLevel plugin;
 
+    private Player player;
+
+    private String saveName;
     /**
      * 建立玩家数据并自行读取
      *
@@ -43,8 +44,8 @@ public class ExpData {
     public ExpData(SXLevel plugin, Player player) {
         this.player = player;
         this.plugin = plugin;
+        this.saveName = Config.getDataUseUuidSave() ? player.getUniqueId().toString() : player.getName();
         YamlConfiguration yaml = new YamlConfiguration();
-        String saveName = Config.getDataUseUuidSave() ? this.player.getUniqueId().toString() : this.player.getName();
         if (plugin.getMysql() != null) {
             if (plugin.getMysql().isExists(plugin.getSqlName(), "name", saveName)) {
                 Object object = plugin.getMysql().getValue(plugin.getSqlName(), "name", saveName, "date");
@@ -66,14 +67,7 @@ public class ExpData {
         }
         this.level = yaml.getInt("Level");
         this.exp = yaml.getInt("Exp");
-        if (Config.getSxLevelSetDefaultExp()) {
-            player.setLevel(this.getLevel());
-            if (this.getMaxExp() != 0) {
-                player.setExp(this.getExp() / (float) this.getMaxExp());
-            } else {
-                player.setExp(0);
-            }
-        }
+        updateDefaultExp();
     }
 
     public ExpData(File file) {
@@ -223,10 +217,8 @@ public class ExpData {
      */
     public ExpData save() {
         YamlConfiguration yaml = new YamlConfiguration();
-        yaml.set("Name", this.player.getName());
         yaml.set("Exp", this.exp);
         yaml.set("Level", this.level);
-        String saveName = Config.getDataUseUuidSave() ? this.player.getUniqueId().toString() : this.player.getName();
         if (plugin.getMysql() != null) {
             if (!plugin.getMysql().isExists(plugin.getSqlName(), "name", saveName)) {
                 plugin.getMysql().intoValue(plugin.getSqlName(), saveName, yaml.saveToString());

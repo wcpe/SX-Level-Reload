@@ -41,8 +41,17 @@ public class OnListener implements Listener {
 
     @EventHandler
     void onAsyncPlayerPreLoginEvent(AsyncPlayerPreLoginEvent event) {
-        if (Config.isSql() && plugin.getMysql() == null) {
-            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.getMsg(Message.PLAYER__NO_SQL_CONNECTION));
+        if (Config.isSql()) {
+            if (plugin.getMysql() == null){
+                event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.getMsg(Message.PLAYER__NO_SQL_CONNECTION));
+            }else {
+                //测试模式 在玩家未登录前进行测试
+                try {
+                    Thread.sleep(Config.getConfig().getInt(Config.SQL_JOIN_DELAY));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

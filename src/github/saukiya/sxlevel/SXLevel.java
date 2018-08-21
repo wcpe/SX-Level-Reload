@@ -1,6 +1,7 @@
 package github.saukiya.sxlevel;
 
 import github.saukiya.sxlevel.api.SXLevelAPI;
+import github.saukiya.sxlevel.bstats.Metrics;
 import github.saukiya.sxlevel.command.MainCommand;
 import github.saukiya.sxlevel.data.ExpData;
 import github.saukiya.sxlevel.data.ExpDataManager;
@@ -66,7 +67,7 @@ public class SXLevel extends JavaPlugin implements Listener {
         Bukkit.getConsoleSender().sendMessage(Message.getMessagePrefix() + "ServerVersion: " + version);
         String[] strSplit = version.split("[.]");
         IntStream.range(0, strSplit.length).forEachOrdered(i -> versionSplit[i] = Integer.valueOf(strSplit[i]));
-
+        new Metrics(this);
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new Placeholders(this);
             Bukkit.getConsoleSender().sendMessage(Message.getMessagePrefix() + "Find PlaceholderAPI!");
