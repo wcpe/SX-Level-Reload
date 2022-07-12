@@ -2,7 +2,6 @@ package github.saukiya.sxlevel.command;
 
 import github.saukiya.sxlevel.SXLevel;
 import github.saukiya.sxlevel.util.Message;
-import lombok.Getter;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -19,13 +18,10 @@ public abstract class SubCommand {
 
     static final CommandList subCommands = new CommandList();
 
-    @Getter
     private final JavaPlugin plugin;
-
-    private String cmd, arg = "";
-
+    private final String cmd;
+    private String arg = "";
     private Boolean hide = false;
-
     private SenderType[] senderTypes = new SenderType[]{SenderType.ALL};
 
     public SubCommand(JavaPlugin plugin, String cmd, String arg, Boolean hide, SenderType... senderTypes) {
@@ -64,6 +60,10 @@ public abstract class SubCommand {
         if (plugin != null) {
             subCommands.add(this);
         }
+    }
+
+    public JavaPlugin getPlugin() {
+        return plugin;
     }
 
     protected String cmd() {

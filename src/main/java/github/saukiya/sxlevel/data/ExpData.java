@@ -2,16 +2,13 @@ package github.saukiya.sxlevel.data;
 
 import github.saukiya.sxlevel.SXLevel;
 import github.saukiya.sxlevel.event.SXLevelUpEvent;
-import github.saukiya.sxlevel.sql.MySQLExecutorService;
 import github.saukiya.sxlevel.util.Config;
 import github.saukiya.sxlevel.util.Message;
-import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import top.wcpe.wcpelib.bukkit.utils.StringActionUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,63 +21,38 @@ import java.util.List;
 
 public class ExpData {
 
-    @Getter
-    @Setter
-    private int level;
-    @Getter
-    @Setter
-    private int exp;
-
-    private SXLevel plugin;
-
+    private int level = 0;
+    private int exp = 0;
     private Player player;
 
-    private String saveName;
-    /**
-     * 建立玩家数据并自行读取
-     *
-     * @param player
-     */
-    public ExpData(SXLevel plugin, Player player) {
+    public ExpData(Player player) {
         this.player = player;
-        this.plugin = plugin;
-        this.saveName = Config.getDataUseUuidSave() ? player.getUniqueId().toString() : player.getName();
-        YamlConfiguration yaml = new YamlConfiguration();
-        if (plugin.getMysql() != null) {
-            if (plugin.getMysql().isExists(plugin.getSqlName(), "name", saveName)) {
-                Object object = plugin.getMysql().getValue(plugin.getSqlName(), "name", saveName, "date");
-                try {
-                    yaml.loadFromString(object.toString());
-                } catch (InvalidConfigurationException e) {
-                    e.printStackTrace();
-                }
+        if (SXLevel.getPlugin().getMysql() != null) {
+            ExpData expData = SXLevel.getPlugin().getExpDataDao().get(player.getName());
+            if (expData != null) {
+                this.exp = expData.getExp();
+                this.level = expData.getLevel();
             }
-        } else {
-            File file = new File(SXLevel.getPlugin().getDataFolder(), "PlayerData" + File.separator + saveName + ".yml");
-            if (file.exists()) {
-                try {
-                    yaml.load(file);
-                } catch (IOException | InvalidConfigurationException e) {
-                    e.printStackTrace();
-                }
-            }
+            updateDefaultExp();
+            return;
         }
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(new File(SXLevel.getPlugin().getDataFolder(),
+                "PlayerData" + File.separator + player.getName() + ".yml"));
         this.level = yaml.getInt("Level");
         this.exp = yaml.getInt("Exp");
         updateDefaultExp();
     }
 
-    public ExpData(File file) {
-        YamlConfiguration yaml = new YamlConfiguration();
-        if (file.exists()) {
-            try {
-                yaml.load(file);
-            } catch (IOException | InvalidConfigurationException e) {
-                e.printStackTrace();
-            }
-        }
-        this.level = yaml.getInt("Level");
-        this.exp = yaml.getInt("Exp");
+    public ExpData(Player player, int exp, int level) {
+        this.player = player;
+        this.exp = exp;
+        this.level = level;
+        updateDefaultExp();
+    }
+
+    @Override
+    public String toString() {
+        return "ExpData [level=" + level + ", exp=" + exp + ", player=" + player + "]";
     }
 
     public Boolean hasExp(int hasExp) {
@@ -118,7 +90,8 @@ public class ExpData {
             }
         }
         updateDefaultExp();
-        Message.send(player, Message.getMsg(Message.PLAYER__EXP, this.level, this.getExp(), this.getMaxExp(), "§c§l-" + change));
+        Message.send(player,
+                Message.getMsg(Message.PLAYER__EXP, this.level, this.getExp(), this.getMaxExp(), "§c§l-" + change));
     }
 
     public void addExp(int addExp) {
@@ -137,19 +110,23 @@ public class ExpData {
                 addExp = (this.getExp() + addExp) - this.getMaxExp();
                 this.setExp(0);
                 this.setLevel(this.getLevel() + 1);
+                StringActionUtil.executionCommands(Config.getConfig().getStringList(Config.LEVEL_UP_STRING_ACTION + "." + getLevel()), false, player);
                 levelUp = true;
             } else {
                 this.setExp(this.getExp() + addExp);
                 break;
             }
         }
+
         updateDefaultExp();
-        Message.send(player, Message.getMsg(Message.PLAYER__EXP, this.level, this.getExp(), this.getMaxExp(), "§e§l+" + change));
+        Message.send(player,
+                Message.getMsg(Message.PLAYER__EXP, this.level, this.getExp(), this.getMaxExp(), "§e§l+" + change));
         if (!levelUp) {
-            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, change / 50f, change / 20f);
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, change / 50f,
+                    change / 20f);
         } else {
             Bukkit.getPluginManager().callEvent(new SXLevelUpEvent(player, this));
-            MySQLExecutorService.getThread().execute(this::save);
+            save();
             Message.send(player, Message.getMsg(Message.PLAYER__LEVEL_UP, this.level, this.getMaxExp()));
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, change / 20f, change / 20f);
         }
@@ -159,9 +136,14 @@ public class ExpData {
         if (Config.getSxLevelSetDefaultExp()) {
             player.setLevel(this.getLevel());
             if (this.getMaxExp() != 0) {
-                player.setExp(this.getExp() / (float) this.getMaxExp());
+                int maxExp = this.getMaxExp();
+                if (maxExp < this.getExp()) {
+                    player.setExp(1.0F);
+                } else {
+                    player.setExp(this.getExp() / (float) this.getMaxExp());
+                }
             } else {
-                player.setExp(0);
+                player.setExp(0.0F);
             }
         }
     }
@@ -210,29 +192,47 @@ public class ExpData {
         return maxLevel;
     }
 
-    /**
-     * 保存数据
-     *
-     * @return playerData 返回自己
-     */
-    public ExpData save() {
-        YamlConfiguration yaml = new YamlConfiguration();
+    public void save() {
+        if (SXLevel.getPlugin().getMysql() != null) {
+            SXLevel.getPlugin().getExpDataDao().add(this);
+            updateDefaultExp();
+            return;
+        }
+        File f = new File(SXLevel.getPlugin().getDataFolder(),
+                "PlayerData" + File.separator + player.getName() + ".yml");
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(f);
         yaml.set("Exp", this.exp);
         yaml.set("Level", this.level);
-        if (plugin.getMysql() != null) {
-            if (!plugin.getMysql().isExists(plugin.getSqlName(), "name", saveName)) {
-                plugin.getMysql().intoValue(plugin.getSqlName(), saveName, yaml.saveToString());
-            } else {
-                plugin.getMysql().setValue(plugin.getSqlName(), "name", saveName, "date", yaml.saveToString());
-            }
-        } else {
-            File file = new File(SXLevel.getPlugin().getDataFolder(), "PlayerData" + File.separator + saveName + ".yml");
-            try {
-                yaml.save(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        try {
+            yaml.save(f);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return this;
+        updateDefaultExp();
     }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public int getExp() {
+        return exp;
+    }
+
+    public void setExp(int exp) {
+        this.exp = exp;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
 }

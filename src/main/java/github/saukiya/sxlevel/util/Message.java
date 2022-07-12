@@ -1,7 +1,6 @@
 package github.saukiya.sxlevel.util;
 
 import github.saukiya.sxlevel.SXLevel;
-import lombok.Getter;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -22,34 +21,24 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 public enum Message {
-    MESSAGE_VERSION,
-    PLAYER__NO_SQL_CONNECTION,
-    PLAYER__EXP,
-    PLAYER__LEVEL_UP,
-    PLAYER__MAX_LEVEL,
+    MESSAGE_VERSION, PLAYER__NO_SQL_CONNECTION, PLAYER__EXP, PLAYER__LEVEL_UP, PLAYER__MAX_LEVEL,
 
-    ADMIN__ADD_EXP,
-    ADMIN__TAKE_EXP,
-    ADMIN__SET_EXP,
-    ADMIN__SET_LEVEL,
-    ADMIN__NO_PERMISSION_CMD,
-    ADMIN__NO_CMD,
-    ADMIN__NO_FORMAT,
-    ADMIN__NO_ONLINE,
-    ADMIN__NO_CONSOLE,
-    ADMIN__PLUGIN_RELOAD,
+    ADMIN__ADD_EXP, ADMIN__TAKE_EXP, ADMIN__SET_EXP, ADMIN__SET_LEVEL, ADMIN__NO_PERMISSION_CMD, ADMIN__NO_CMD,
+    ADMIN__NO_FORMAT, ADMIN__NO_ONLINE, ADMIN__NO_CONSOLE, ADMIN__PLUGIN_RELOAD,
 
-    COMMAND__ADD,
-    COMMAND__TAKE,
-    COMMAND__SET,
-    COMMAND__UPDATELOCALDATATOSQL,
-    COMMAND__RELOAD;
+    COMMAND__ADD, COMMAND__TAKE, COMMAND__SET, COMMAND__UPDATELOCALDATATOSQL, COMMAND__RELOAD;
 
     private static final File FILE = new File(SXLevel.getPlugin().getDataFolder(), "Message.yml");
-    @Getter
     private static final String messagePrefix = "[" + SXLevel.getPlugin().getName() + "] ";
-    @Getter
     private static YamlConfiguration messages;
+
+    public static String getMessagePrefix() {
+        return messagePrefix;
+    }
+
+    public static YamlConfiguration getMessages() {
+        return messages;
+    }
 
     private static void createDefaultMessage() {
         messages.set(MESSAGE_VERSION.toString(), SXLevel.getPlugin().getDescription().getVersion());
@@ -84,8 +73,10 @@ public enum Message {
      * @throws IOException IOException
      */
     private static boolean detectionVersion() throws IOException {
-        if (!messages.getString(Message.MESSAGE_VERSION.toString(), "").equals(SXLevel.getPlugin().getDescription().getVersion())) {
-            messages.save(new File(FILE.toString().replace(".yml", "_" + messages.getString(Message.MESSAGE_VERSION.toString()) + ".yml")));
+        if (!messages.getString(Message.MESSAGE_VERSION.toString(), "")
+                .equals(SXLevel.getPlugin().getDescription().getVersion())) {
+            messages.save(new File(FILE.toString().replace(".yml",
+                    "_" + messages.getString(Message.MESSAGE_VERSION.toString()) + ".yml")));
             messages = new YamlConfiguration();
             createDefaultMessage();
             return true;
@@ -124,7 +115,8 @@ public enum Message {
      * @return String
      */
     public static String getMsg(Message loc, Object... args) {
-        return ChatColor.translateAlternateColorCodes('&', MessageFormat.format(messages.getString(loc.toString(), "Null Message: " + loc), args));
+        return ChatColor.translateAlternateColorCodes('&',
+                MessageFormat.format(messages.getString(loc.toString(), "Null Message: " + loc), args));
     }
 
     /**
@@ -136,8 +128,10 @@ public enum Message {
      */
     public static List<String> getStringList(Message loc, Object... args) {
         List<String> list = messages.getStringList(loc.toString());
-        if (list.size() == 0) return Collections.singletonList("Null Message: " + loc);
-        IntStream.range(0, list.size()).forEach(i -> list.set(i, ChatColor.translateAlternateColorCodes('&', MessageFormat.format(list.get(i), args))));
+        if (list.size() == 0)
+            return Collections.singletonList("Null Message: " + loc);
+        IntStream.range(0, list.size()).forEach(
+                i -> list.set(i, ChatColor.translateAlternateColorCodes('&', MessageFormat.format(list.get(i), args))));
         return list;
     }
 
@@ -153,7 +147,8 @@ public enum Message {
         TextComponent tcMessage = new TextComponent(message);
         if (stringList != null && stringList.size() > 0) {
             ComponentBuilder bc = new ComponentBuilder(stringList.get(0).replace("&", "§"));
-            IntStream.range(1, stringList.size()).mapToObj(i -> "\n" + stringList.get(i).replace("&", "§")).forEach(bc::append);
+            IntStream.range(1, stringList.size()).mapToObj(i -> "\n" + stringList.get(i).replace("&", "§"))
+                    .forEach(bc::append);
             tcMessage.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, bc.create()));
         }
         if (command != null) {
@@ -169,7 +164,8 @@ public enum Message {
      * @param message String
      */
     public static void send(LivingEntity entity, String message) {
-        if (message.contains("Null Message")) return;
+        if (message.contains("Null Message"))
+            return;
         if (entity instanceof Player) {
             Player player = (Player) entity;
             if (message.contains("[ACTIONBAR]")) {

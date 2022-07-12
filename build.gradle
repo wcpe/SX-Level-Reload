@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'top.wcpe'
-version '1.0.0'
+version '1.0.1-alpha-dev-1'
 
 processResources {
     def props = [version: version]
@@ -32,8 +32,14 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    wcpelibVersion = "1.0.15"
+}
+
 dependencies {
     implementation "org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT"
+    implementation "top.wcpe:wcpelib-common:${rootProject.ext.wcpelibVersion}"
+    implementation "top.wcpe:wcpelib-bukkit:${rootProject.ext.wcpelibVersion}"
 
     implementation 'me.clip:placeholderapi:2.10.4'
     implementation "io.lumine.xikage.mythicmobs:MythicMobs:4.7.0"
@@ -46,6 +52,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
 }
 
 test {

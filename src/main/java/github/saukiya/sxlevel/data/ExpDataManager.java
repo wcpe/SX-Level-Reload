@@ -1,13 +1,10 @@
 package github.saukiya.sxlevel.data;
 
 import github.saukiya.sxlevel.SXLevel;
-import github.saukiya.sxlevel.sql.MySQLExecutorService;
 import github.saukiya.sxlevel.util.Config;
 import github.saukiya.sxlevel.util.Message;
-import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
 
@@ -18,9 +15,7 @@ import java.util.HashMap;
 
 public class ExpDataManager {
 
-    @Getter
-    private final HashMap<Player, ExpData> map = new HashMap<>();
-
+    private final HashMap<String, ExpData> map = new HashMap<>();
     private final SXLevel plugin;
 
     public ExpDataManager(SXLevel plugin) {
@@ -28,33 +23,46 @@ public class ExpDataManager {
         autoSave();
     }
 
+    public HashMap<String, ExpData> getMap() {
+        return map;
+    }
+
+    public void saveAllData() {
+        map.values().forEach(ExpData::save);
+    }
+
     /**
      * 定时保存玩家数据
      */
     private void autoSave() {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                MySQLExecutorService.getThread().execute(() -> {
-                    map.values().forEach(ExpData::save);
-                    Bukkit.getConsoleSender().sendMessage(Message.getMessagePrefix() + "Save ExpData!");
-                });
-            }
-        }.runTaskTimerAsynchronously(SXLevel.getPlugin(), 6000, Config.getConfig().getInt(Config.AUTO_SAVE_TICK, 6000));
+        Bukkit.getScheduler().runTaskTimerAsynchronously(SXLevel.getPlugin(), () -> {
+                    saveAllData();
+                    plugin.log(Message.getMessagePrefix() + "保存数据!");
+                }, Config.getConfig().getInt(Config.AUTO_SAVE_TICK, 6000),
+                Config.getConfig().getInt(Config.AUTO_SAVE_TICK, 6000));
     }
 
     public ExpData getPlayerData(Player player) {
-        ExpData playerData = map.get(player);
+        ExpData playerData = map.get(player.getName());
         if (playerData == null) {
-            playerData = new ExpData(plugin, player);
-            map.put(player, playerData);
+            map.put(player.getName(), new ExpData(player));
         }
-        return playerData;
+        return map.get(player.getName());
     }
 
-    public void removePlayerData(Player player) {
-        if (map.containsKey(player)) {
-            MySQLExecutorService.getThread().execute(() -> map.remove(player).save());
+    public ExpData getPlayerData(Player player, Integer level, Integer exp) {
+        ExpData playerData = map.get(player.getName());
+        if (playerData == null) {
+            map.put(player.getName(), new ExpData(player, level, exp));
+        }
+        return map.get(player.getName());
+    }
+
+    public void saveData(Player player) {
+        ExpData playerData = map.get(player.getName());
+        if (playerData != null) {
+            playerData.save();
+            map.remove(player.getName());
         }
     }
 }

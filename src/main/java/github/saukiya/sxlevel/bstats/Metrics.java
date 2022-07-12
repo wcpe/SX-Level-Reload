@@ -1,6 +1,5 @@
 package github.saukiya.sxlevel.bstats;
 
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -18,6 +17,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Level;
@@ -188,7 +188,7 @@ public class Metrics {
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         GZIPOutputStream gzip = new GZIPOutputStream(outputStream);
-        gzip.write(str.getBytes("UTF-8"));
+        gzip.write(str.getBytes(StandardCharsets.UTF_8));
         gzip.close();
         return outputStream.toByteArray();
     }
@@ -209,7 +209,7 @@ public class Metrics {
      * Starts the Scheduler which submits our data every 30 minutes.
      */
     private void startSubmitting() {
-        ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1, new BasicThreadFactory.Builder().namingPattern("metrics-schedule-pool-%d").daemon(true).build());
+        ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1);
         executorService.scheduleAtFixedRate(() ->
         {
             if (!plugin.isEnabled()) {
@@ -326,7 +326,8 @@ public class Metrics {
                 for (RegisteredServiceProvider<?> provider : Bukkit.getServicesManager().getRegistrations(service)) {
                     try {
                         pluginData.add(provider.getService().getMethod("getPluginData").invoke(provider.getProvider()));
-                    } catch (NullPointerException | NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
+                    } catch (NullPointerException | NoSuchMethodException | IllegalAccessException |
+                             InvocationTargetException ignored) {
                     }
                 }
             } catch (NoSuchFieldException ignored) {

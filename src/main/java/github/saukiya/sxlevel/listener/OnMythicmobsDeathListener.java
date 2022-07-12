@@ -37,7 +37,8 @@ public class OnMythicmobsDeathListener implements Listener {
                     String[] args = str.split(" ");
                     if (args.length > 1 && args[0].equalsIgnoreCase("sExp")) {
                         int addExp = 1;
-                        if (args.length > 2 && args[2].length() > 0 && new Random().nextDouble() > Double.valueOf(args[2].replaceAll("[^0-9.]", ""))) {// 几率判断
+                        if (args.length > 2 && args[2].length() > 0
+                                && new Random().nextDouble() > Double.valueOf(args[2].replaceAll("[^0-9.]", ""))) {// 几率判断
                             continue;
                         }
                         if (args[1].length() > 0) {// 数量判断
@@ -45,7 +46,8 @@ public class OnMythicmobsDeathListener implements Listener {
                                 int i1 = Integer.valueOf(args[1].split("-")[0].replaceAll("[^0-9]", ""));
                                 int i2 = Integer.valueOf(args[1].split("-")[1].replaceAll("[^0-9]", ""));
                                 if (i1 > i2) {
-                                    Bukkit.getConsoleSender().sendMessage("[" + SXLevel.getPlugin().getName() + "] §c随机数大小不正确!: §4" + str);
+                                    Bukkit.getConsoleSender().sendMessage(
+                                            "[" + SXLevel.getPlugin().getName() + "] §c随机数大小不正确!: §4" + str);
                                 } else {
                                     addExp = new Random().nextInt(i2 - i1 + 1) + i1;
                                 }
@@ -53,8 +55,10 @@ public class OnMythicmobsDeathListener implements Listener {
                                 addExp = Integer.valueOf(args[1].replaceAll("[^0-9]", ""));
                             }
                         }
-                        ExpData playerData = plugin.getExpDataManager().getPlayerData((Player) event.getKiller());
-                        SXExpChangeEvent sxExpChangeEvent = new SXExpChangeEvent((Player) event.getKiller(), playerData, addExp, ChangeType.ADD);
+                        ExpData playerData = plugin.getExpDataManager()
+                                .getPlayerData((Player) event.getKiller());
+                        SXExpChangeEvent sxExpChangeEvent = new SXExpChangeEvent((Player) event.getKiller(), playerData,
+                                addExp, ChangeType.ADD);
                         Bukkit.getPluginManager().callEvent(sxExpChangeEvent);
                         if (!sxExpChangeEvent.isCancelled()) {
                             playerData.addExp(sxExpChangeEvent.getAmount());

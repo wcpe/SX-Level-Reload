@@ -1,9 +1,11 @@
 package github.saukiya.sxlevel.command;
 
 import github.saukiya.sxlevel.SXLevel;
-import github.saukiya.sxlevel.command.sub.*;
+import github.saukiya.sxlevel.command.sub.AddCommand;
+import github.saukiya.sxlevel.command.sub.ReloadCommand;
+import github.saukiya.sxlevel.command.sub.SetCommand;
+import github.saukiya.sxlevel.command.sub.TakeCommand;
 import github.saukiya.sxlevel.util.Message;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,21 +24,20 @@ public class MainCommand implements CommandExecutor, TabCompleter {
 
     private final CommandList subCommands = SubCommand.subCommands;
 
-    private SXLevel plugin;
+    private final SXLevel plugin;
 
     public MainCommand(SXLevel plugin) {
         this.plugin = plugin;
         new AddCommand();
         new TakeCommand();
         new SetCommand();
-        new UpdateLocalDataToSqlCommand();
         new ReloadCommand();
     }
 
     public void setUp(String command) {
         plugin.getCommand(command).setExecutor(this);
         plugin.getCommand(command).setTabCompleter(this);
-        Bukkit.getConsoleSender().sendMessage(Message.getMessagePrefix() + "Load §c" + subCommands.size() + "§r Commands");
+        plugin.log(Message.getMessagePrefix() + "加载 §c" + subCommands.size() + "§r 子命令");
     }
 
     private SenderType getType(CommandSender sender) {

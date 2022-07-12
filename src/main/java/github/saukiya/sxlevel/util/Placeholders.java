@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 
 import java.text.DecimalFormat;
 
+@SuppressWarnings("deprecation")
 public class Placeholders extends EZPlaceholderHook {
 
     private final SXLevel plugin;

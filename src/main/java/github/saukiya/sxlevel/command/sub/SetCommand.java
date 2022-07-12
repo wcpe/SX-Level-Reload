@@ -4,7 +4,6 @@ import github.saukiya.sxlevel.SXLevel;
 import github.saukiya.sxlevel.command.SenderType;
 import github.saukiya.sxlevel.command.SubCommand;
 import github.saukiya.sxlevel.data.ExpData;
-import github.saukiya.sxlevel.sql.MySQLExecutorService;
 import github.saukiya.sxlevel.util.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -48,7 +47,7 @@ public class SetCommand extends SubCommand {
             sender.sendMessage(Message.getMsg(Message.ADMIN__SET_EXP, player.getName(), String.valueOf(exp), String.valueOf(playerData.getExp()), String.valueOf(playerData.getMaxExp())));
         }
         playerData.updateDefaultExp();
-        MySQLExecutorService.getThread().execute(playerData::save);
+        playerData.save();
     }
 
     @Override
