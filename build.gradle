@@ -1,0 +1,85 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.5.31'
+    id 'java'
+    id 'maven-publish'
+    id 'org.jetbrains.dokka' version "1.6.10"
+}
+
+group 'top.wcpe'
+version '1.0.0'
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+    from('src/main/java') {
+        include '**/*.xml'
+    }
+    from('src/main/kotlin') {
+        include '**/*.xml'
+    }
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        allowInsecureProtocol = true
+        url "http://maven.wcpe.top/repository/maven-public/"
+    }
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT"
+
+    implementation 'me.clip:placeholderapi:2.10.4'
+    implementation "io.lumine.xikage.mythicmobs:MythicMobs:4.7.0"
+
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    testCompileOnly 'org.projectlombok:lombok:1.18.22'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    archiveClassifier = 'sources'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+
+            groupId project.group
+            artifactId project.name
+            version project.version
+            from components.java
+            artifact sourcesJar
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                allowInsecureProtocol = true
+                username = project.findProperty("username").toString()
+                password = project.findProperty("password").toString()
+            }
+            def releasesRepoUrl = "http://maven.wcpe.top/repository/maven-releases/"
+            def snapshotsRepoUrl = "http://maven.wcpe.top/repository/maven-snapshots/"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
+
+
