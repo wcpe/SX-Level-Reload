@@ -2,7 +2,6 @@ package github.saukiya.sxlevel.command.sub;
 
 import github.saukiya.sxlevel.SXLevel;
 import github.saukiya.sxlevel.command.SubCommand;
-import github.saukiya.sxlevel.util.Config;
 import github.saukiya.sxlevel.util.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -17,14 +16,14 @@ import java.util.List;
 public class ReloadCommand extends SubCommand {
 
     public ReloadCommand() {
-        super(SXLevel.getPlugin(), "reload");
+        super(SXLevel.getInstance(), "reload");
     }
 
     @Override
     public void onCommand(SXLevel plugin, CommandSender sender, String[] args) {
-        Long oldTimes = System.currentTimeMillis();
+        long oldTimes = System.currentTimeMillis();
         try {
-            Config.loadConfig();
+            SXLevel.getInstance().reloadConfig();
             Message.loadMessage();
             Bukkit.getConsoleSender().sendMessage(Message.getMessagePrefix() + "Reloading Time: §c" + (System.currentTimeMillis() - oldTimes) + "§7 ms");
             sender.sendMessage(Message.getMsg(Message.ADMIN__PLUGIN_RELOAD));

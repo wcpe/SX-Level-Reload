@@ -1,11 +1,11 @@
 package github.saukiya.sxlevel.listener;
 
 import github.saukiya.sxlevel.SXLevel;
-import github.saukiya.sxlevel.data.ExpData;
 import github.saukiya.sxlevel.event.ChangeType;
 import github.saukiya.sxlevel.event.SXExpChangeEvent;
 import io.lumine.xikage.mythicmobs.api.bukkit.events.MythicMobDeathEvent;
 import io.lumine.xikage.mythicmobs.mobs.MythicMob;
+import lombok.val;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,12 +20,9 @@ import java.util.Random;
  */
 
 public class OnMythicmobsDeathListener implements Listener {
-
-    private final SXLevel plugin;
-
-    public OnMythicmobsDeathListener(SXLevel plugin) {
-        this.plugin = plugin;
-    }
+    private final Random random = new Random();
+    private final String regex_1 = "[^0-9.]";
+    private final String regex_2 = "[^0-9]";
 
     @EventHandler
     void onMythicMobDeathEvent(MythicMobDeathEvent event) {
@@ -38,30 +35,29 @@ public class OnMythicmobsDeathListener implements Listener {
                     if (args.length > 1 && args[0].equalsIgnoreCase("sExp")) {
                         int addExp = 1;
                         if (args.length > 2 && args[2].length() > 0
-                                && new Random().nextDouble() > Double.valueOf(args[2].replaceAll("[^0-9.]", ""))) {// 几率判断
+                                && random.nextDouble() > Double.parseDouble(args[2].replaceAll(regex_1, ""))) {// 几率判断
                             continue;
                         }
                         if (args[1].length() > 0) {// 数量判断
                             if (args[1].contains("-") && args[1].split("-").length > 1) {
-                                int i1 = Integer.valueOf(args[1].split("-")[0].replaceAll("[^0-9]", ""));
-                                int i2 = Integer.valueOf(args[1].split("-")[1].replaceAll("[^0-9]", ""));
+                                int i1 = Integer.parseInt(args[1].split("-")[0].replaceAll(regex_2, ""));
+                                int i2 = Integer.parseInt(args[1].split("-")[1].replaceAll(regex_2, ""));
                                 if (i1 > i2) {
                                     Bukkit.getConsoleSender().sendMessage(
-                                            "[" + SXLevel.getPlugin().getName() + "] §c随机数大小不正确!: §4" + str);
+                                            "[" + SXLevel.getInstance().getName() + "] §c随机数大小不正确!: §4" + str);
                                 } else {
                                     addExp = new Random().nextInt(i2 - i1 + 1) + i1;
                                 }
                             } else {
-                                addExp = Integer.valueOf(args[1].replaceAll("[^0-9]", ""));
+                                addExp = Integer.valueOf(args[1].replaceAll(regex_2, ""));
                             }
                         }
-                        ExpData playerData = plugin.getExpDataManager()
-                                .getPlayerData((Player) event.getKiller());
-                        SXExpChangeEvent sxExpChangeEvent = new SXExpChangeEvent((Player) event.getKiller(), playerData,
+                        final val playerLevel = SXLevel.getDataManager().getPlayerLevel(event.getKiller().getName());
+                        SXExpChangeEvent sxExpChangeEvent = new SXExpChangeEvent((Player) event.getKiller(), playerLevel.toExpData(),
                                 addExp, ChangeType.ADD);
                         Bukkit.getPluginManager().callEvent(sxExpChangeEvent);
                         if (!sxExpChangeEvent.isCancelled()) {
-                            playerData.addExp(sxExpChangeEvent.getAmount());
+                            playerLevel.addExp(sxExpChangeEvent.getAmount());
                         }
                     }
                 }

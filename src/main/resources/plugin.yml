@@ -1,11 +1,11 @@
-name: SX-Level
+name: SX-Level-Reload
 main: github.saukiya.sxlevel.SXLevel
-version: 1.2.1
+version: "${version}"
 author:
 - Saukiya
 softdepend:
 - MythicMobs
-
+depend: ["WcpeLib"]
 commands:
    sxlevel:
       usage: error! please reload this plugin

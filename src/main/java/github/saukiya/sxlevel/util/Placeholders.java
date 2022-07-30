@@ -1,13 +1,12 @@
 package github.saukiya.sxlevel.util;
 
 import github.saukiya.sxlevel.SXLevel;
-import github.saukiya.sxlevel.data.ExpData;
+import lombok.val;
 import me.clip.placeholderapi.external.EZPlaceholderHook;
 import org.bukkit.entity.Player;
 
 import java.text.DecimalFormat;
 
-@SuppressWarnings("deprecation")
 public class Placeholders extends EZPlaceholderHook {
 
     private final SXLevel plugin;
@@ -22,19 +21,19 @@ public class Placeholders extends EZPlaceholderHook {
     public String onPlaceholderRequest(Player player, String string) {
         DecimalFormat df = new DecimalFormat("#.##");
         double d = 0;
-        ExpData playerData = plugin.getExpDataManager().getPlayerData(player);
+        final val playerLevel = SXLevel.getDataManager().getPlayerLevel(player.getName());
         if (string.equalsIgnoreCase("exp")) {
-            d = playerData.getExp();
+            d = playerLevel.getExp();
         } else if (string.equalsIgnoreCase("expPercentage")) {
-            if (playerData.getMaxExp() != 0) {
-                d = (double) playerData.getExp() / playerData.getMaxExp();
+            if (playerLevel.getMaxExp() != 0) {
+                d = (double) playerLevel.getExp() / playerLevel.getMaxExp();
             }
         } else if (string.equalsIgnoreCase("maxExp")) {
-            d = playerData.getMaxExp();
+            d = playerLevel.getMaxExp();
         } else if (string.equalsIgnoreCase("level")) {
-            d = playerData.getLevel();
+            d = playerLevel.getLevel();
         } else if (string.equalsIgnoreCase("maxLevel")) {
-            d = playerData.getMaxLevel();
+            d = playerLevel.getMaxLevel();
         } else {
             return "§c变量填写错误";
         }

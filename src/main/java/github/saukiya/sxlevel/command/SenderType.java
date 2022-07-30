@@ -6,8 +6,6 @@ package github.saukiya.sxlevel.command;
 
 public enum SenderType {
     PLAYER,
-
     CONSOLE,
-
     ALL
 }

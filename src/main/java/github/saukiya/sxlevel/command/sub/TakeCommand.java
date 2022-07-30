@@ -3,11 +3,9 @@ package github.saukiya.sxlevel.command.sub;
 import github.saukiya.sxlevel.SXLevel;
 import github.saukiya.sxlevel.command.SenderType;
 import github.saukiya.sxlevel.command.SubCommand;
-import github.saukiya.sxlevel.data.ExpData;
 import github.saukiya.sxlevel.util.Message;
-import org.bukkit.Bukkit;
+import lombok.val;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.util.List;
 
@@ -17,7 +15,7 @@ import java.util.List;
 public class TakeCommand extends SubCommand {
 
     public TakeCommand() {
-        super(SXLevel.getPlugin(), "take", " <player> <value>", SenderType.ALL);
+        super(SXLevel.getInstance(), "take", " <player> <value>", SenderType.ALL);
     }
 
     @Override
@@ -26,17 +24,10 @@ public class TakeCommand extends SubCommand {
             sender.sendMessage(Message.getMsg(Message.ADMIN__NO_FORMAT));
             return;
         }
-        Player player = Bukkit.getPlayerExact(args[1]);
-        if (player == null) {
-            sender.sendMessage(Message.getMsg(Message.ADMIN__NO_ONLINE));
-            return;
-        }
-        ExpData playerData = plugin.getExpDataManager().getPlayerData(player);
-        int takeExp = Integer.valueOf(args[2].replaceAll("[^0-9]", ""));
-        playerData.takeExp(takeExp);
-        playerData.updateDefaultExp();
-        // 为了防止腐竹经常使用该指令，不在这里插入playerData.save();
-        sender.sendMessage(Message.getMsg(Message.ADMIN__TAKE_EXP, player.getName(), String.valueOf(takeExp), String.valueOf(playerData.getExp()), String.valueOf(playerData.getMaxExp())));
+        final val playerLevel = SXLevel.getDataManager().getPlayerLevel(args[1]);
+        int takeExp = Integer.parseInt(args[2].replaceAll(regex, ""));
+        playerLevel.takeExp(takeExp);
+        sender.sendMessage(Message.getMsg(Message.ADMIN__TAKE_EXP, args[1], String.valueOf(takeExp), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp())));
     }
 
     @Override

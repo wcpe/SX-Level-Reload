@@ -28,8 +28,8 @@ public enum Message {
 
     COMMAND__ADD, COMMAND__TAKE, COMMAND__SET, COMMAND__UPDATELOCALDATATOSQL, COMMAND__RELOAD;
 
-    private static final File FILE = new File(SXLevel.getPlugin().getDataFolder(), "Message.yml");
-    private static final String messagePrefix = "[" + SXLevel.getPlugin().getName() + "] ";
+    private static final File FILE = new File(SXLevel.getInstance().getDataFolder(), "Message.yml");
+    private static final String messagePrefix = "[" + SXLevel.getInstance().getName() + "] ";
     private static YamlConfiguration messages;
 
     public static String getMessagePrefix() {
@@ -41,7 +41,7 @@ public enum Message {
     }
 
     private static void createDefaultMessage() {
-        messages.set(MESSAGE_VERSION.toString(), SXLevel.getPlugin().getDescription().getVersion());
+        messages.set(MESSAGE_VERSION.toString(), SXLevel.getInstance().getDescription().getVersion());
 
         messages.set(PLAYER__MAX_LEVEL.toString(), "[ACTIONBAR]&a&l你已经满级了!");
         messages.set(PLAYER__NO_SQL_CONNECTION.toString(), "&c服务器暂未准备好，请稍后连接");
@@ -74,7 +74,7 @@ public enum Message {
      */
     private static boolean detectionVersion() throws IOException {
         if (!messages.getString(Message.MESSAGE_VERSION.toString(), "")
-                .equals(SXLevel.getPlugin().getDescription().getVersion())) {
+                .equals(SXLevel.getInstance().getDescription().getVersion())) {
             messages.save(new File(FILE.toString().replace(".yml",
                     "_" + messages.getString(Message.MESSAGE_VERSION.toString()) + ".yml")));
             messages = new YamlConfiguration();

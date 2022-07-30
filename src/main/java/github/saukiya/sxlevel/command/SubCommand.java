@@ -15,9 +15,8 @@ import java.util.List;
  * @author Saukiya
  */
 public abstract class SubCommand {
-
     static final CommandList subCommands = new CommandList();
-
+    protected final String regex = "[^0-9]";
     private final JavaPlugin plugin;
     private final String cmd;
     private String arg = "";
@@ -79,7 +78,7 @@ public abstract class SubCommand {
     }
 
     private String permission() {
-        return SXLevel.getPlugin().getName() + "." + cmd;
+        return SXLevel.getInstance().getName() + "." + cmd;
     }
 
     public abstract void onCommand(SXLevel plugin, CommandSender sender, String[] args);

@@ -1,12 +1,12 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.5.31'
+    id 'org.jetbrains.kotlin.jvm' version '1.7.10'
     id 'java'
     id 'maven-publish'
-    id 'org.jetbrains.dokka' version "1.6.10"
+    id 'org.jetbrains.dokka' version "1.7.10"
 }
 
 group 'top.wcpe'
-version '1.0.1-alpha-dev-1'
+version '1.1.0-alpha-dev-1'
 
 processResources {
     def props = [version: version]
@@ -43,6 +43,14 @@ dependencies {
 
     implementation 'me.clip:placeholderapi:2.10.4'
     implementation "io.lumine.xikage.mythicmobs:MythicMobs:4.7.0"
+
+    implementation "com.squareup.moshi:moshi:1.13.0"
+    implementation "com.squareup.moshi:moshi-kotlin:1.13.0"
+    implementation "dev.zacsweers.moshix:moshi-metadata-reflect:0.18.3"
+
+    implementation "redis.clients:jedis:3.6.0"
+    implementation "org.mybatis:mybatis:3.5.6"
+
 
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'

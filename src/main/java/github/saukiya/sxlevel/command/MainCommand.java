@@ -15,13 +15,14 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 /**
  * @author Saukiya
  */
 
 public class MainCommand implements CommandExecutor, TabCompleter {
-
+    private static final Logger logger = SXLevel.getInstance().getLogger();
     private final CommandList subCommands = SubCommand.subCommands;
 
     private final SXLevel plugin;
@@ -34,10 +35,11 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         new ReloadCommand();
     }
 
-    public void setUp(String command) {
+    public MainCommand setUp(String command) {
         plugin.getCommand(command).setExecutor(this);
         plugin.getCommand(command).setTabCompleter(this);
-        plugin.log(Message.getMessagePrefix() + "加载 §c" + subCommands.size() + "§r 子命令");
+        logger.info(Message.getMessagePrefix() + "加载 §c" + subCommands.size() + "§r 子命令");
+        return this;
     }
 
     private SenderType getType(CommandSender sender) {
@@ -51,7 +53,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command arg1, String label, String[] args) {
         SenderType type = getType(sender);
         if (args.length == 0) {
-            sender.sendMessage("§0-§8 --§7 ---§c ----§4 -----§b " + SXLevel.getPlugin().getName() + "§4 -----§c ----§7 ---§8 --§0 - §0Author Saukiya");
+            sender.sendMessage("§0-§8 --§7 ---§c ----§4 -----§b " + SXLevel.getInstance().getName() + "§4 -----§c ----§7 ---§8 --§0 - §0Author Saukiya");
             String color = "§7";
             for (SubCommand sub : subCommands.toCollection()) {
                 if (sub.isUse(sender, type) && !sub.hide()) {
