@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'top.wcpe'
-version '1.1.0-alpha-dev-1'
+version '1.1.0-alpha-dev-2'
 
 processResources {
     def props = [version: version]
@@ -37,19 +37,19 @@ ext {
 }
 
 dependencies {
-    implementation "org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT"
-    implementation "top.wcpe:wcpelib-common:${rootProject.ext.wcpelibVersion}"
-    implementation "top.wcpe:wcpelib-bukkit:${rootProject.ext.wcpelibVersion}"
+    compileOnly "org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT"
+    compileOnly "top.wcpe:wcpelib-common:${rootProject.ext.wcpelibVersion}"
+    compileOnly "top.wcpe:wcpelib-bukkit:${rootProject.ext.wcpelibVersion}"
 
-    implementation 'me.clip:placeholderapi:2.10.4'
-    implementation "io.lumine.xikage.mythicmobs:MythicMobs:4.7.0"
+    compileOnly 'me.clip:placeholderapi:2.10.4'
+    compileOnly "io.lumine.xikage.mythicmobs:MythicMobs:4.7.0"
 
     implementation "com.squareup.moshi:moshi:1.13.0"
     implementation "com.squareup.moshi:moshi-kotlin:1.13.0"
     implementation "dev.zacsweers.moshix:moshi-metadata-reflect:0.18.3"
 
-    implementation "redis.clients:jedis:3.6.0"
-    implementation "org.mybatis:mybatis:3.5.6"
+    implementation 'redis.clients:jedis:4.2.3'
+    implementation 'org.mybatis:mybatis:3.5.10'
 
 
     compileOnly 'org.projectlombok:lombok:1.18.22'
