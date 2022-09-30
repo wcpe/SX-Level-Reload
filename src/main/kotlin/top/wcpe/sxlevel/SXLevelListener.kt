@@ -17,7 +17,7 @@ import org.bukkit.event.player.PlayerJoinEvent
  * GitHub  : https://github.com/wcpe
  * QQ      : 1837019522
  * @author : WCPE
- * @since  : v
+ * @since  : v1.1.0-alpha-dev-1
  */
 class SXLevelListener : Listener {
     @EventHandler

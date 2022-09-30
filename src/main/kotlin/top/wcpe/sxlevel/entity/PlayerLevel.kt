@@ -23,7 +23,7 @@ import java.util.function.Consumer
  * GitHub  : https://github.com/wcpe
  * QQ      : 1837019522
  * @author : WCPE
- * @since  : v
+ * @since  : v1.1.0-alpha-dev-1
  */
 data class PlayerLevel(
     val playerName: String, var exp: Int = 0, var level: Int = 0
