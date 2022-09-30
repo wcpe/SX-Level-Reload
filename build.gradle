@@ -1,8 +1,16 @@
+buildscript {
+    ext {
+        kotlin_version = "1.7.10"
+        wcpelibVersion = "1.0.17"
+    }
+}
+
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.7.10'
+    id 'idea'
     id 'java'
+    id 'org.jetbrains.kotlin.jvm' version "${kotlin_version}"
     id 'maven-publish'
-    id 'org.jetbrains.dokka' version "1.7.10"
+    id 'org.jetbrains.dokka' version "${kotlin_version}"
 }
 
 group 'top.wcpe'
@@ -32,14 +40,10 @@ repositories {
     mavenCentral()
 }
 
-ext {
-    wcpelibVersion = "1.0.15"
-}
-
 dependencies {
     compileOnly "org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT"
-    compileOnly "top.wcpe:wcpelib-common:${rootProject.ext.wcpelibVersion}"
-    compileOnly "top.wcpe:wcpelib-bukkit:${rootProject.ext.wcpelibVersion}"
+    compileOnly "top.wcpe:wcpelib-common:${wcpelibVersion}"
+    compileOnly "top.wcpe:wcpelib-bukkit:${wcpelibVersion}"
 
     compileOnly 'me.clip:placeholderapi:2.10.4'
     compileOnly "io.lumine.xikage.mythicmobs:MythicMobs:4.7.0"
@@ -52,14 +56,37 @@ dependencies {
     implementation 'org.mybatis:mybatis:3.5.10'
 
 
-    compileOnly 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
-    testCompileOnly 'org.projectlombok:lombok:1.18.22'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    testCompileOnly 'org.projectlombok:lombok:1.18.24'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib"
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains:annotations:23.0.0"
+
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+}
+
+def targetJavaVersion = 8
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release = targetJavaVersion
+    }
 }
 
 tasks.withType(JavaCompile) {
@@ -68,6 +95,20 @@ tasks.withType(JavaCompile) {
 
 test {
     useJUnitPlatform()
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = '1.8'
+        freeCompilerArgs += "-Xjvm-default=all-compatibility"
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = '1.8'
+        freeCompilerArgs += "-Xjvm-default=all-compatibility"
+    }
 }
 
 task sourcesJar(type: Jar) {
@@ -99,5 +140,3 @@ publishing {
         }
     }
 }
-
-
