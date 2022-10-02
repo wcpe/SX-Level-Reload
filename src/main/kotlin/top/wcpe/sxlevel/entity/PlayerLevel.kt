@@ -1,6 +1,5 @@
 package top.wcpe.sxlevel.entity
 
-import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -28,24 +27,17 @@ import java.util.function.Consumer
 data class PlayerLevel(
     val playerName: String, var exp: Int = 0, var level: Int = 0
 ) {
-    @Transient
-    @Json(ignore = true)
-    private var lateInitPlayer: Player? = null
 
     private fun runPlayer(callBack: Consumer<Player>) {
-        if (lateInitPlayer == null) {
-            val playerExact = Bukkit.getPlayerExact(playerName)
-            if (playerExact == null || !playerExact.isOnline) {
-                return
-            }
-            lateInitPlayer = playerExact
+        val playerExact = Bukkit.getPlayerExact(playerName)
+        if (playerExact == null || !playerExact.isOnline) {
+            return
         }
-        callBack.accept(lateInitPlayer!!)
+        callBack.accept(playerExact)
     }
 
     constructor(playerName: String, yamlConfiguration: YamlConfiguration) : this(
-        playerName, yamlConfiguration.getInt("Exp"),
-        yamlConfiguration.getInt("Level")
+        playerName, yamlConfiguration.getInt("Exp"), yamlConfiguration.getInt("Level")
     ) {
         updateDefaultExp()
     }
@@ -118,11 +110,8 @@ data class PlayerLevel(
         updateDefaultExp()
         runPlayer { player ->
             Message.send(
-                player,
-                Message.getMsg(
-                    Message.PLAYER__EXP, this.level, this.exp,
-                    getMaxExp(),
-                    "§c§l-$change"
+                player, Message.getMsg(
+                    Message.PLAYER__EXP, this.level, this.exp, getMaxExp(), "§c§l-$change"
                 )
             )
         }
@@ -152,9 +141,7 @@ data class PlayerLevel(
                 level += 1
                 runPlayer {
                     StringActionUtil.executionCommands(
-                        SXLevel.instance.config.getStringList("level-up-string-action.$level"),
-                        false,
-                        it
+                        SXLevel.instance.config.getStringList("level-up-string-action.$level"), false, it
                     )
                 }
                 levelUp = true
@@ -167,19 +154,15 @@ data class PlayerLevel(
         updateDefaultExp()
         runPlayer {
             Message.send(
-                it,
-                Message.getMsg(
-                    Message.PLAYER__EXP,
-                    level, exp, getMaxExp(),
-                    "§e§l+$add"
+                it, Message.getMsg(
+                    Message.PLAYER__EXP, level, exp, getMaxExp(), "§e§l+$add"
                 )
             )
         }
         if (!levelUp) {
             runPlayer {
                 it.world.playSound(
-                    it.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, add / 50f,
-                    add / 20f
+                    it.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, add / 50f, add / 20f
                 )
             }
 
@@ -188,8 +171,7 @@ data class PlayerLevel(
                 Bukkit.getPluginManager().callEvent(SXLevelUpEvent(player, ExpData(this)))
                 Message.send(
                     player, Message.getMsg(
-                        Message.PLAYER__LEVEL_UP,
-                        level, getMaxExp()
+                        Message.PLAYER__LEVEL_UP, level, getMaxExp()
                     )
                 )
                 player.world.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, add / 20f, add / 20f)
