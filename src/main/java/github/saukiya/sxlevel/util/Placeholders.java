@@ -9,19 +9,19 @@ import java.text.DecimalFormat;
 
 public class Placeholders extends EZPlaceholderHook {
 
-    private final SXLevel plugin;
-
     public Placeholders(SXLevel plugin) {
         super(plugin, "sl");
-        this.plugin = plugin;
         this.hook();
     }
 
     @Override
     public String onPlaceholderRequest(Player player, String string) {
+        if (player == null) {
+            return "";
+        }
         DecimalFormat df = new DecimalFormat("#.##");
         double d = 0;
-        final val playerLevel = SXLevel.getDataManager().getPlayerLevel(player.getName());
+        val playerLevel = SXLevel.getDataManager().getPlayerLevel(player.getName());
         if (string.equalsIgnoreCase("exp")) {
             d = playerLevel.getExp();
         } else if (string.equalsIgnoreCase("expPercentage")) {

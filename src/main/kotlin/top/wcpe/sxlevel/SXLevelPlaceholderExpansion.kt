@@ -32,7 +32,10 @@ class SXLevelPlaceholderExpansion : PlaceholderExpansion() {
         return "1.0.0"
     }
 
-    override fun onPlaceholderRequest(player: Player, identifier: String): String {
+    override fun onPlaceholderRequest(player: Player?, identifier: String): String {
+        if (player == null) {
+            return ""
+        }
         val df = DecimalFormat("#.##")
         var d = 0.0
         val playerLevel = SXLevel.dataManager.getPlayerLevel(player.name)
