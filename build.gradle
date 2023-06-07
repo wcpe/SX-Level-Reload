@@ -14,7 +14,7 @@ plugins {
 }
 
 group 'top.wcpe'
-version '1.1.1'
+version '1.1.2-alpha-dev-1'
 
 processResources {
     def props = [version: version]
@@ -47,6 +47,7 @@ dependencies {
 
     compileOnly 'me.clip:placeholderapi:2.10.4'
     compileOnly "io.lumine.xikage.mythicmobs:MythicMobs:4.7.0"
+    compileOnly("org.serverct.ersha:AttributePlus:3.3.1.1")
 
     implementation "com.squareup.moshi:moshi:1.13.0"
     implementation "com.squareup.moshi:moshi-kotlin:1.13.0"

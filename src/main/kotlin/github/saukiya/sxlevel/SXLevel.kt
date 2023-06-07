@@ -8,6 +8,7 @@ import github.saukiya.sxlevel.util.Placeholders
 import org.bukkit.Bukkit
 import org.bukkit.configuration.InvalidConfigurationException
 import org.bukkit.plugin.java.JavaPlugin
+import top.wcpe.sxlevel.AttributePlusListener
 import top.wcpe.sxlevel.SXLevelListener
 import top.wcpe.sxlevel.SXLevelPlaceholderExpansion
 import top.wcpe.sxlevel.data.FileDataManager
@@ -75,6 +76,10 @@ class SXLevel : JavaPlugin() {
         }
         MainCommand(this).setUp("sxLevel")
         server.pluginManager.registerEvents(SXLevelListener(), this)
+
+        if (server.pluginManager.getPlugin("AttributePlus") != null) {
+            server.pluginManager.registerEvents(AttributePlusListener(), this)
+        }
 
         val version =
             Bukkit.getBukkitVersion().split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0].replace(

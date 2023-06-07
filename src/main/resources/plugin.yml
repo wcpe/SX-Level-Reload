@@ -1,15 +1,15 @@
 name: SX-Level-Reload
 main: github.saukiya.sxlevel.SXLevel
 version: "${version}"
-author:
-- Saukiya
+author: "Saukiya, WCPE"
 softdepend:
-- MythicMobs
-depend: ["WcpeLib"]
+  - MythicMobs
+  - AttributePlus
+depend: [ "WcpeLib" ]
 commands:
-   sxlevel:
-      usage: error! please reload this plugin
-      aliases:
+  sxlevel:
+    usage: error! please reload this plugin
+    aliases:
       - sl
 
 permissions:

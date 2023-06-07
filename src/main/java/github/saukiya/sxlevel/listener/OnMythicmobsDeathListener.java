@@ -27,14 +27,13 @@ public class OnMythicmobsDeathListener implements Listener {
         if (!(event.getKiller() instanceof Player)) {
             return;
         }
-        final val mobType = event.getMobType();
+        val mobType = event.getMobType();
         for (String str : mobType.getConfig().getStringList("Drops")) {
             if (str.contains(" ")) {
                 String[] args = str.split(" ");
                 if (args.length > 1 && args[0].equalsIgnoreCase("sExp")) {
                     int addExp = 1;
-                    if (args.length > 2 && args[2].length() > 0
-                            && random.nextDouble() > Double.parseDouble(args[2].replaceAll(regex_1, ""))) {// 几率判断
+                    if (args.length > 2 && args[2].length() > 0 && random.nextDouble() > Double.parseDouble(args[2].replaceAll(regex_1, ""))) {// 几率判断
                         continue;
                     }
                     if (args[1].length() > 0) {// 数量判断
@@ -42,21 +41,18 @@ public class OnMythicmobsDeathListener implements Listener {
                             int i1 = Integer.parseInt(args[1].split("-")[0].replaceAll(regex_2, ""));
                             int i2 = Integer.parseInt(args[1].split("-")[1].replaceAll(regex_2, ""));
                             if (i1 > i2) {
-                                Bukkit.getConsoleSender().sendMessage(
-                                        "[" + SXLevel.getInstance().getName() + "] §c随机数大小不正确!: §4" + str);
+                                Bukkit.getConsoleSender().sendMessage("[" + SXLevel.getInstance().getName() + "] §c随机数大小不正确!: §4" + str);
                             } else {
                                 addExp = new Random().nextInt(i2 - i1 + 1) + i1;
                             }
                         } else {
-                            addExp = Integer.valueOf(args[1].replaceAll(regex_2, ""));
+                            addExp = Integer.parseInt(args[1].replaceAll(regex_2, ""));
                         }
                     }
-                    final val playerLevel = SXLevel.getDataManager().getPlayerLevel(event.getKiller().getName());
-                    SXExpChangeEvent sxExpChangeEvent = new SXExpChangeEvent((Player) event.getKiller(), playerLevel.toExpData(),
-                            addExp, ChangeType.ADD);
-                    Bukkit.getPluginManager().callEvent(sxExpChangeEvent);
+                    val playerLevel = SXLevel.getDataManager().getPlayerLevel(event.getKiller().getName());
+                    SXExpChangeEvent sxExpChangeEvent = SXExpChangeEvent.callEvent((Player) event.getKiller(), playerLevel.toExpData(), addExp, ChangeType.ADD);
                     if (!sxExpChangeEvent.isCancelled()) {
-                        playerLevel.addExp(sxExpChangeEvent.getAmount());
+                        playerLevel.addExp(sxExpChangeEvent.getAmount(), sxExpChangeEvent.getTipAdditionMessageList().toArray(new String[]{}));
                     }
                 }
             }

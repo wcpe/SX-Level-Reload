@@ -88,8 +88,11 @@ data class PlayerLevel(
         return true
     }
 
-
     fun takeExp(take: Int) {
+        takeExp(take, "")
+    }
+
+    fun takeExp(take: Int, vararg tipAdditionMessage: String) {
         var takeExp = take
         val change: Int = takeExp
         while (takeExp > 0) {
@@ -111,7 +114,7 @@ data class PlayerLevel(
         runPlayer { player ->
             Message.send(
                 player, Message.getMsg(
-                    Message.PLAYER__EXP, this.level, this.exp, getMaxExp(), "§c§l-$change"
+                    Message.PLAYER__EXP, this.level, this.exp, getMaxExp(), "§c§l-$change", *tipAdditionMessage
                 )
             )
         }
@@ -119,6 +122,10 @@ data class PlayerLevel(
     }
 
     fun addExp(add: Int) {
+        addExp(add, "")
+    }
+
+    fun addExp(add: Int, vararg tipAdditionMessage: String) {
         if (getMaxLevel() <= level) {
             runPlayer {
                 Message.send(it, Message.getMsg(Message.PLAYER__MAX_LEVEL))
@@ -155,7 +162,7 @@ data class PlayerLevel(
         runPlayer {
             Message.send(
                 it, Message.getMsg(
-                    Message.PLAYER__EXP, level, exp, getMaxExp(), "§e§l+$add"
+                    Message.PLAYER__EXP, level, exp, getMaxExp(), "§e§l+$add", *tipAdditionMessage
                 )
             )
         }

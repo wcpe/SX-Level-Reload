@@ -3,7 +3,6 @@ package top.wcpe.sxlevel
 import github.saukiya.sxlevel.SXLevel
 import github.saukiya.sxlevel.event.ChangeType
 import github.saukiya.sxlevel.event.SXExpChangeEvent
-import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerExpChangeEvent
@@ -31,17 +30,16 @@ class SXLevelListener : Listener {
         if (SXLevel.instance.config.getBoolean("disabled-default-exp-change")) {
             e.amount = 0
         }
-        if (SXLevel.instance.config.getBoolean("default-exp.enable")) {
-            val playerLevel = SXLevel.dataManager.getPlayerLevel(e.player.name)
-            val sxExpChangeEvent = SXExpChangeEvent(
-                e.player, playerLevel.toExpData(), addExp,
-                ChangeType.ADD
-            )
-            Bukkit.getPluginManager().callEvent(sxExpChangeEvent)
-            if (!sxExpChangeEvent.isCancelled) {
-                playerLevel.addExp(sxExpChangeEvent.amount)
-            }
+        if (!SXLevel.instance.config.getBoolean("default-exp.enable")) {
+            return
         }
+        val playerLevel = SXLevel.dataManager.getPlayerLevel(e.player.name)
+
+        val sxExpChangeEvent = SXExpChangeEvent.callEvent(e.player, playerLevel.toExpData(), addExp, ChangeType.ADD)
+        if (!sxExpChangeEvent.isCancelled) {
+            playerLevel.addExp(sxExpChangeEvent.amount, *sxExpChangeEvent.tipAdditionMessageList.toTypedArray())
+        }
+
     }
 
 }
