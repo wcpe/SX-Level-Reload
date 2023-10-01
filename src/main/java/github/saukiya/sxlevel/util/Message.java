@@ -23,7 +23,7 @@ import java.util.stream.IntStream;
 public enum Message {
     MESSAGE_VERSION, PLAYER__NO_SQL_CONNECTION, PLAYER__EXP, PLAYER__LEVEL_UP, PLAYER__MAX_LEVEL,
 
-    ADMIN__ADD_EXP, ADMIN__TAKE_EXP, ADMIN__SET_EXP, ADMIN__SET_LEVEL, ADMIN__NO_PERMISSION_CMD, ADMIN__NO_CMD,
+    ADMIN__ADD_EXP,ADMIN__ADD_LEVEL,  ADMIN__TAKE_EXP, ADMIN__SET_EXP, ADMIN__SET_LEVEL, ADMIN__NO_PERMISSION_CMD, ADMIN__NO_CMD,
     ADMIN__NO_FORMAT, ADMIN__NO_ONLINE, ADMIN__NO_CONSOLE, ADMIN__PLUGIN_RELOAD,
 
     COMMAND__ADD, COMMAND__TAKE, COMMAND__SET, COMMAND__UPDATELOCALDATATOSQL, COMMAND__RELOAD;
@@ -49,6 +49,7 @@ public enum Message {
         messages.set(PLAYER__LEVEL_UP.toString(), "[TITLE]&e&l&n Level   Up! &r\n&e&lLv.{0} &8&l- &e&lMaxExp:{1}");
         messages.set(PLAYER__MAX_LEVEL.toString(), "[ACTIONBAR]&a&l你已经满级了!");
         messages.set(ADMIN__ADD_EXP.toString(), messagePrefix + "&c增长 &6{0}&c 玩家 &6{1} &c经验 &7[&6{2}&7/&6{3}&7]");
+        messages.set(ADMIN__ADD_LEVEL.toString(), messagePrefix + "&c增长 &6{0}&c 玩家 &6{1} &c等级 &7[&6{2}&7/&6{3}&7]");
         messages.set(ADMIN__TAKE_EXP.toString(), messagePrefix + "&c减少 &6{0}&c 玩家 &6{1} &c经验 &7[&6{2}&7/&6{3}&7]");
         messages.set(ADMIN__SET_EXP.toString(), messagePrefix + "&c设置 &6{0}&c 玩家经验为: &6{1} &7[&6{2}&7/&6{3}&7]");
         messages.set(ADMIN__SET_LEVEL.toString(), messagePrefix + "&c设置 &6{0}&c 玩家等级为: &6{1}&c 级");

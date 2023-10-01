@@ -121,6 +121,60 @@ data class PlayerLevel(
 
     }
 
+    fun addLevel(level: Int) {
+        addLevel(level, "")
+    }
+
+    fun addLevel(addLevel: Int, vararg tipAdditionMessage: String) {
+        if (getMaxLevel() <= level) {
+            runPlayer {
+                Message.send(it, Message.getMsg(Message.PLAYER__MAX_LEVEL))
+            }
+            return
+        }
+
+        var addExp = 0
+        for (i in 0..addLevel) {
+            val maxExp = getMaxExp()
+            if (maxExp == 0) {
+                break
+            }
+            addExp += maxExp
+            // 升级
+            exp = 0
+            level += 1
+            runPlayer {
+                StringActionUtil.executionCommands(
+                    SXLevel.instance.config.getStringList("level-up-string-action.$level"), false, it
+                )
+            }
+        }
+
+
+        save()
+        updateDefaultExp()
+        runPlayer {
+            Message.send(
+                it, Message.getMsg(
+                    Message.PLAYER__EXP, level, exp, getMaxExp(), "§e§l+$addExp", *tipAdditionMessage
+                )
+            )
+        }
+
+        runPlayer { player ->
+            Bukkit.getPluginManager().callEvent(SXLevelUpEvent(player, ExpData(this)))
+            Message.send(
+                player, Message.getMsg(
+                    Message.PLAYER__LEVEL_UP, level, getMaxExp()
+                )
+            )
+            player.world.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, addExp / 20f, addExp / 20f)
+        }
+
+
+    }
+
+
     fun addExp(add: Int) {
         addExp(add, "")
     }

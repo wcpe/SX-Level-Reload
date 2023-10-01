@@ -25,7 +25,7 @@ public class SetCommand extends SubCommand {
             sender.sendMessage(Message.getMsg(Message.ADMIN__NO_FORMAT));
             return;
         }
-        final val playerLevel = SXLevel.getDataManager().getPlayerLevel(args[1]);
+        val playerLevel = SXLevel.getDataManager().getPlayerLevel(args[1]);
         if (args[2].toLowerCase().contains("l")) {
             int level = Integer.parseInt(args[2].replaceAll(regex, ""));
             playerLevel.setLevel(level);

@@ -25,9 +25,18 @@ public class AddCommand extends SubCommand {
             return;
         }
         val playerLevel = SXLevel.getDataManager().getPlayerLevel(args[1]);
-        int addExp = Integer.parseInt(args[2].replaceAll(regex, ""));
-        playerLevel.addExp(addExp);
-        sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_EXP, args[1], String.valueOf(addExp), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp())));
+
+        val inputString = args[2];
+        int add = Integer.parseInt(inputString.replaceAll(regex, ""));
+        if (inputString.toLowerCase().contains("l")) {
+            playerLevel.addLevel(add);
+            sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_LEVEL, args[1], String.valueOf(add), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp())));
+        } else {
+            playerLevel.addExp(add);
+            sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_EXP, args[1], String.valueOf(add), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp())));
+
+        }
+
     }
 
     @Override
