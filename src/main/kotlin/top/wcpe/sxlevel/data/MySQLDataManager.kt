@@ -1,10 +1,9 @@
 package top.wcpe.sxlevel.data
 
-import github.saukiya.sxlevel.SXLevel
-import redis.clients.jedis.Jedis
 import top.wcpe.sxlevel.entity.PlayerLevel
 import top.wcpe.sxlevel.mapper.PlayerLevelMapper
-import top.wcpe.wcpelib.bukkit.WcpeLib
+import top.wcpe.wcpelib.common.mybatis.Mybatis
+import top.wcpe.wcpelib.common.redis.Redis
 
 /**
  * 由 WCPE 在 2022/7/9 19:50 创建
@@ -16,14 +15,11 @@ import top.wcpe.wcpelib.bukkit.WcpeLib
  * @author : WCPE
  * @since  : v1.1.0-alpha-dev-1
  */
-class MySQLDataManager : IDataManager {
+class MySQLDataManager(private val mybatis: Mybatis, private val redis: Redis) : IDataManager {
     init {
-        WcpeLib.getMybatis().sqlSessionFactory.openSession().use {
-            val playerDataMapper = it.getMapper(PlayerLevelMapper::class.java)
-            if (playerDataMapper.existTable(WcpeLib.getMybatis().databaseName) == 0) {
-                playerDataMapper.createTable()
-            }
-            it.commit()
+        mybatis.addMapper(PlayerLevelMapper::class.java)
+        mybatis.sqlSessionFactory.openSession(true).use {
+            it.getMapper(PlayerLevelMapper::class.java).createTable()
         }
     }
 
@@ -31,33 +27,23 @@ class MySQLDataManager : IDataManager {
         private const val REDIS_KEY = "SX-Level"
     }
 
-    private fun getResource(): Jedis {
-        val resource = WcpeLib.getRedis().getResource()
-        resource.select(SXLevel.instance.config.getInt("redis.index"))
-        return resource
-    }
-
-    private fun setValue(resource: Jedis, redisKey: String, value: String) {
-        resource[redisKey] = value
-        resource.expire(redisKey, SXLevel.instance.config.getLong("redis.expire"))
-    }
 
     override fun getPlayerLevel(playerName: String): PlayerLevel {
         val redisKey = "$REDIS_KEY:$playerName"
-        getResource().use { resource ->
+        redis.getResourceProxy().use { resource ->
 
             val value = resource.get(redisKey)
 
             if (value != null) {
                 return PlayerLevel.stringToThis(playerName, value)
             }
-            WcpeLib.getMybatis().sqlSessionFactory.openSession().use { sqlSession ->
+            mybatis.sqlSessionFactory.openSession().use { sqlSession ->
                 val playerLevelMapper = sqlSession.getMapper(PlayerLevelMapper::class.java)
                 return playerLevelMapper.getPlayerLevel(playerName) ?: PlayerLevel(playerName)
                     .also {
                         playerLevelMapper.insertPlayerLevel(it)
                         sqlSession.commit()
-                        setValue(resource, redisKey, it.saveToString())
+                        resource[redisKey] = it.saveToString()
                     }
             }
         }
@@ -65,14 +51,14 @@ class MySQLDataManager : IDataManager {
 
     override fun savePlayerLevel(playerLevel: PlayerLevel): Boolean {
         val redisKey = "$REDIS_KEY:${playerLevel.playerName}"
-        getResource().use { resource ->
-            WcpeLib.getMybatis().sqlSessionFactory.openSession().use { sqlSession ->
+        redis.getResourceProxy().use { resource ->
+            mybatis.sqlSessionFactory.openSession().use { sqlSession ->
                 val mapper = sqlSession.getMapper(PlayerLevelMapper::class.java)
 
                 return try {
                     mapper.updatePlayerLevel(playerLevel)
                     sqlSession.commit()
-                    setValue(resource, redisKey, playerLevel.saveToString())
+                    resource[redisKey] = playerLevel.saveToString()
                     true
                 } catch (e: Exception) {
                     sqlSession.rollback()

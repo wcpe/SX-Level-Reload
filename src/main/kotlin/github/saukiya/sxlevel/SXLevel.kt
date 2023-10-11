@@ -14,8 +14,7 @@ import top.wcpe.sxlevel.SXLevelPlaceholderExpansion
 import top.wcpe.sxlevel.data.FileDataManager
 import top.wcpe.sxlevel.data.IDataManager
 import top.wcpe.sxlevel.data.MySQLDataManager
-import top.wcpe.sxlevel.mapper.PlayerLevelMapper
-import top.wcpe.wcpelib.bukkit.WcpeLib
+import top.wcpe.wcpelib.common.WcpeLibCommon
 import java.io.IOException
 import java.util.stream.IntStream
 
@@ -67,11 +66,13 @@ class SXLevel : JavaPlugin() {
         }
         dataManager = FileDataManager()
         if (config.getBoolean("mysql")) {
-            if (WcpeLib.isEnableMysql()) {
-                WcpeLib.getMybatis().addMapper(PlayerLevelMapper::class.java)
-                dataManager = MySQLDataManager()
+            val mybatis = WcpeLibCommon.mybatis
+            val redis = WcpeLibCommon.redis
+            if (mybatis == null || redis == null) {
+                logger.info("WcpeLib 未开启链接数据库 关闭服务器!")
+                server.shutdown()
             } else {
-                logger.info("WcpeLib 未开启连接数据库 将使用本地文件存储!")
+                dataManager = MySQLDataManager(mybatis, redis)
             }
         }
         MainCommand(this).setUp("sxLevel")

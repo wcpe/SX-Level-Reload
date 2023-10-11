@@ -14,11 +14,7 @@ import top.wcpe.sxlevel.entity.PlayerLevel
  * @since  : v1.1.0-alpha-dev-1
  */
 interface PlayerLevelMapper {
-
-    @Select("select count(*) from information_schema.TABLES t where t.TABLE_SCHEMA =#{databaseName} and t.TABLE_NAME = 'sxlevel_player_level'")
-    fun existTable(databaseName: String): Int
-
-    @Update("create table `sxlevel_player_level` (`player_name` varchar(32) NOT NULL, `exp` int NOT NULL, `level` int NOT NULL, PRIMARY KEY (`player_name`));")
+    @Update("CREATE TABLE IF NOT EXISTS `sxlevel_player_level` (`player_name` varchar(32) NOT NULL, `exp` int NOT NULL, `level` int NOT NULL, PRIMARY KEY (`player_name`));")
     fun createTable()
 
     @ResultMap("playerLevelMap")

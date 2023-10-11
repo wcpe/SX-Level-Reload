@@ -1,9 +1,4 @@
 mysql: false
-redis:
-  index: 0
-  #使用第几个数据库
-  expire: 900
-  #过期时间 单位 秒
 update-default-exp: true
 #更新原版经验
 disabled-default-exp-change: false
