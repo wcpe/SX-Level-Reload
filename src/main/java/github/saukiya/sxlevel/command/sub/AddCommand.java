@@ -24,17 +24,30 @@ public class AddCommand extends SubCommand {
             sender.sendMessage(Message.getMsg(Message.ADMIN__NO_FORMAT));
             return;
         }
-        val playerLevel = SXLevel.getDataManager().getPlayerLevel(args[1]);
+        val playerName = args[1];
+        val playerLevel = SXLevel.getDataManager().getPlayerLevel(playerName);
 
         val inputString = args[2];
         int add = Integer.parseInt(inputString.replaceAll(regex, ""));
         if (inputString.toLowerCase().contains("l")) {
             playerLevel.addLevel(add);
-            sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_LEVEL, args[1], String.valueOf(add), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp())));
+            sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_LEVEL, playerName, String.valueOf(add), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp())));
+        } else if (inputString.toLowerCase().contains("%")) {
+            val maxLevel = playerLevel.getMaxLevel();
+            val exp = playerLevel.getExp();
+            val b = exp / maxLevel * 100;
+
+            if (b + add >= 100) {
+                playerLevel.addLevel(1);
+                sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_LEVEL, playerName, String.valueOf(1), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp())));
+            } else {
+                int i = maxLevel * add / 100;
+                playerLevel.addExp(i);
+                sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_EXP, playerName, String.valueOf(i), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp())));
+            }
         } else {
             playerLevel.addExp(add);
-            sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_EXP, args[1], String.valueOf(add), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp())));
-
+            sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_EXP, playerName, String.valueOf(add), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp())));
         }
 
     }
