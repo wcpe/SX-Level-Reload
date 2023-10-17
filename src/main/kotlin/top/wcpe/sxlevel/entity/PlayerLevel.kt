@@ -134,7 +134,7 @@ data class PlayerLevel(
         }
 
         var addExp = 0
-        for (i in 0..addLevel) {
+        for (i in 0 until addLevel) {
             val maxExp = getMaxExp()
             if (maxExp == 0) {
                 break
