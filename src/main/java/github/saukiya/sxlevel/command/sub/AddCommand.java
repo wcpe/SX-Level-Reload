@@ -28,20 +28,25 @@ public class AddCommand extends SubCommand {
         val playerLevel = SXLevel.getDataManager().getPlayerLevel(playerName);
 
         val inputString = args[2];
-        int add = Integer.parseInt(inputString.replaceAll(regex, ""));
+        val replaceInput = inputString.replaceAll(regex, "");
+        int add;
+        if (replaceInput.isEmpty()) {
+            sender.sendMessage(Message.getMsg(Message.ADMIN__NO_FORMAT));
+            return;
+        }
+        add = Integer.parseInt(replaceInput);
         if (inputString.toLowerCase().contains("l")) {
             playerLevel.addLevel(add);
             sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_LEVEL, playerName, String.valueOf(add), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp())));
         } else if (inputString.toLowerCase().contains("%")) {
-            val maxLevel = playerLevel.getMaxLevel();
+            val maxExp = playerLevel.getMaxExp();
             val exp = playerLevel.getExp();
-            val b = exp / maxLevel * 100;
-
-            if (b + add >= 100) {
+            val b = (double) exp / maxExp * 100;
+            if (b + add >= 100.0) {
                 playerLevel.addLevel(1);
                 sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_LEVEL, playerName, String.valueOf(1), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp())));
             } else {
-                int i = maxLevel * add / 100;
+                int i = maxExp * add / 100;
                 playerLevel.addExp(i);
                 sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_EXP, playerName, String.valueOf(i), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp())));
             }
