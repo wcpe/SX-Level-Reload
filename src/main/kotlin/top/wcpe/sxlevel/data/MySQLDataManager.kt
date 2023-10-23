@@ -32,7 +32,7 @@ class MySQLDataManager(private val mybatis: Mybatis, private val redis: Redis) :
         val redisKey = "$REDIS_KEY:$playerName"
         redis.getResourceProxy().use { resource ->
 
-            val value = resource.get(redisKey)
+            val value = resource[redisKey]
 
             if (value != null) {
                 return PlayerLevel.stringToThis(playerName, value)

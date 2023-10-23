@@ -12,6 +12,6 @@ public class SXLevelAPI {
      * @return ExpData 数据
      */
     public ExpData getPlayerData(Player player) {
-        return SXLevel.dataManager.getPlayerLevel(player.getName()).toExpData();
+        return SXLevel.getDataManager().getPlayerLevel(player.getName()).toExpData();
     }
 }

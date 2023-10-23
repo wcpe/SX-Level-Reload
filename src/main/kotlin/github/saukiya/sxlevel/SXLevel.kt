@@ -36,12 +36,15 @@ class SXLevel : JavaPlugin() {
 
         @JvmStatic
         lateinit var instance: SXLevel
+            private set
 
         @JvmStatic
         lateinit var api: SXLevelAPI
+            private set
 
         @JvmStatic
         lateinit var dataManager: IDataManager
+            private set
 
     }
 
