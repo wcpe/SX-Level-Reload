@@ -11,6 +11,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
+import top.wcpe.wcpelib.bukkit.extend.plugin.runTask
 import top.wcpe.wcpelib.bukkit.utils.StringActionUtil
 import java.util.function.Consumer
 
@@ -201,9 +202,11 @@ data class PlayerLevel(
                 exp = 0
                 level += 1
                 runPlayer {
-                    StringActionUtil.executionCommands(
-                        SXLevel.instance.config.getStringList("level-up-string-action.$level"), false, it
-                    )
+                    SXLevel.instance.runTask {
+                        StringActionUtil.executionCommands(
+                            SXLevel.instance.config.getStringList("level-up-string-action.$level"), false, it
+                        )
+                    }
                 }
                 levelUp = true
             } else {
