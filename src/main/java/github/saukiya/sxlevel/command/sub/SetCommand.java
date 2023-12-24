@@ -25,20 +25,21 @@ public class SetCommand extends SubCommand {
             sender.sendMessage(Message.getMsg(Message.ADMIN__NO_FORMAT));
             return;
         }
-        val playerLevel = SXLevel.getDataManager().getPlayerLevel(args[1]);
+        val playerName = args[1];
+        val playerLevel = SXLevel.getDataManager().getPlayerLevel(playerName);
         if (args[2].toLowerCase().contains("l")) {
             int level = Integer.parseInt(args[2].replaceAll(regex, ""));
             playerLevel.setLevel(level);
             playerLevel.setExp(0);
-            // 注入属性
-            sender.sendMessage(Message.getMsg(Message.ADMIN__SET_LEVEL, args[1], String.valueOf(level)));
+            sender.sendMessage(Message.getMsg(Message.ADMIN__SET_LEVEL, playerName, String.valueOf(level)));
         } else {
             int exp = Integer.parseInt(args[2].replaceAll(regex, ""));
-            if (exp > playerLevel.getMaxExp()) {
-                exp = playerLevel.getMaxExp();
+            val maxExp = playerLevel.getMaxExp(playerName);
+            if (exp > maxExp) {
+                exp = maxExp;
             }
             playerLevel.setExp(exp);
-            sender.sendMessage(Message.getMsg(Message.ADMIN__SET_EXP, args[1], String.valueOf(exp), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp())));
+            sender.sendMessage(Message.getMsg(Message.ADMIN__SET_EXP, playerName, String.valueOf(exp), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp(playerName))));
         }
         playerLevel.updateDefaultExp();
         playerLevel.save();

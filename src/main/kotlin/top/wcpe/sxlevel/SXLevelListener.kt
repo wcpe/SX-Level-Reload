@@ -26,11 +26,11 @@ class SXLevelListener : Listener {
 
     @EventHandler
     fun onPlayerExpChangeEvent(e: PlayerExpChangeEvent) {
-        val addExp = (e.amount * SXLevel.instance.config.getDouble("default-exp.value")).toInt()
-        if (SXLevel.instance.config.getBoolean("disabled-default-exp-change")) {
+        val addExp = (e.amount * SXLevel.instance.configuration.defaultExpValue).toInt()
+        if (SXLevel.instance.configuration.disabledDefaultExpChange) {
             e.amount = 0
         }
-        if (!SXLevel.instance.config.getBoolean("default-exp.enable")) {
+        if (!SXLevel.instance.configuration.defaultExpEnable) {
             return
         }
         val playerLevel = SXLevel.dataManager.getPlayerLevel(e.player.name)

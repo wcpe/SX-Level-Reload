@@ -24,10 +24,11 @@ public class TakeCommand extends SubCommand {
             sender.sendMessage(Message.getMsg(Message.ADMIN__NO_FORMAT));
             return;
         }
-        final val playerLevel = SXLevel.getDataManager().getPlayerLevel(args[1]);
+        val playerName = args[1];
+        val playerLevel = SXLevel.getDataManager().getPlayerLevel(playerName);
         int takeExp = Integer.parseInt(args[2].replaceAll(regex, ""));
         playerLevel.takeExp(takeExp);
-        sender.sendMessage(Message.getMsg(Message.ADMIN__TAKE_EXP, args[1], String.valueOf(takeExp), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp())));
+        sender.sendMessage(Message.getMsg(Message.ADMIN__TAKE_EXP, playerName, String.valueOf(takeExp), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp(playerName))));
     }
 
     @Override

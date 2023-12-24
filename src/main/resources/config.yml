@@ -8,7 +8,7 @@ default-exp:
   value: 1.0
 level-sure-exp:
   - "5:500"
-  - "10:1000"
+  - "10:1000:test"
   - "25:3000"
 level-up-string-action:
   '5':

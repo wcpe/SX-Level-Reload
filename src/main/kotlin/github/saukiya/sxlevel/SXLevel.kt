@@ -9,6 +9,7 @@ import org.bukkit.Bukkit
 import org.bukkit.configuration.InvalidConfigurationException
 import org.bukkit.plugin.java.JavaPlugin
 import top.wcpe.sxlevel.AttributePlusListener
+import top.wcpe.sxlevel.Configuration
 import top.wcpe.sxlevel.SXLevelListener
 import top.wcpe.sxlevel.SXLevelPlaceholderExpansion
 import top.wcpe.sxlevel.data.FileDataManager
@@ -46,18 +47,32 @@ class SXLevel : JavaPlugin() {
         lateinit var dataManager: IDataManager
             private set
 
+
     }
+
+    var configuration: Configuration = Configuration(config)
+        private set
 
     @Deprecated("please use getInstance()", ReplaceWith("instance", "github.saukiya.sxlevel.SXLevel.instance"))
     fun getPlugin(): SXLevel {
         return instance
     }
 
-    override fun onEnable() {
-        val oldTimes = System.currentTimeMillis()
+    fun reloadOtherConfig() {
+        reloadConfig()
+        configuration = Configuration(config)
+        Message.loadMessage()
+    }
+
+    override fun onLoad() {
         instance = this
         saveDefaultConfig()
         api = SXLevelAPI()
+
+    }
+
+    override fun onEnable() {
+        val oldTimes = System.currentTimeMillis()
         try {
             Message.loadMessage()
         } catch (e: IOException) {
@@ -68,7 +83,7 @@ class SXLevel : JavaPlugin() {
             logger.info(Message.getMessagePrefix() + "§cError!")
         }
         dataManager = FileDataManager()
-        if (config.getBoolean("mysql")) {
+        if (configuration.mysql) {
             val mybatis = WcpeLibCommon.mybatis
             val redis = WcpeLibCommon.redis
             if (mybatis == null || redis == null) {
