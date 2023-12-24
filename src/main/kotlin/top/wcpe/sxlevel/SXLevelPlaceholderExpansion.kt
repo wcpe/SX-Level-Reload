@@ -42,16 +42,18 @@ class SXLevelPlaceholderExpansion : PlaceholderExpansion() {
         if (identifier.equals("exp", ignoreCase = true)) {
             d = playerLevel.exp.toDouble()
         } else if (identifier.equals("expPercentage", ignoreCase = true)) {
-            val maxExp = playerLevel.getMaxExp()
+            val maxExp = playerLevel.getMaxExp(player.name)
             if (maxExp != 0) {
                 d = playerLevel.exp.toDouble() / maxExp
             }
         } else if (identifier.equals("maxExp", ignoreCase = true)) {
-            d = playerLevel.getMaxExp().toDouble()
+            d = playerLevel.getMaxExp(player.name).toDouble()
         } else if (identifier.equals("level", ignoreCase = true)) {
             d = playerLevel.level.toDouble()
         } else if (identifier.equals("maxLevel", ignoreCase = true)) {
-            d = playerLevel.getMaxLevel().toDouble()
+            d = SXLevel.instance.configuration.maxLevel.toDouble()
+        } else if (identifier.equals("canUpLevel", ignoreCase = true)) {
+            return "${playerLevel.getMaxExp(player.name) != 0}"
         } else {
             return "§c变量填写错误"
         }

@@ -5,9 +5,7 @@ import github.saukiya.sxlevel.command.SubCommand;
 import github.saukiya.sxlevel.util.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.InvalidConfigurationException;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -22,15 +20,9 @@ public class ReloadCommand extends SubCommand {
     @Override
     public void onCommand(SXLevel plugin, CommandSender sender, String[] args) {
         long oldTimes = System.currentTimeMillis();
-        try {
-            SXLevel.getInstance().reloadConfig();
-            Message.loadMessage();
-            Bukkit.getConsoleSender().sendMessage(Message.getMessagePrefix() + "Reloading Time: §c" + (System.currentTimeMillis() - oldTimes) + "§7 ms");
-            sender.sendMessage(Message.getMsg(Message.ADMIN__PLUGIN_RELOAD));
-        } catch (IOException | InvalidConfigurationException e) {
-            e.printStackTrace();
-        }
-
+        SXLevel.getInstance().reloadOtherConfig();
+        Bukkit.getConsoleSender().sendMessage(Message.getMessagePrefix() + "Reloading Time: §c" + (System.currentTimeMillis() - oldTimes) + "§7 ms");
+        sender.sendMessage(Message.getMsg(Message.ADMIN__PLUGIN_RELOAD));
     }
 
     @Override

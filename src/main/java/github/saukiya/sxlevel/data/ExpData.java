@@ -55,11 +55,14 @@ public class ExpData {
     }
 
     public int getMaxExp() {
-        return playerLevel.getMaxExp();
+        return getMaxExp(playerLevel.getPlayerName());
+    }
+    public int getMaxExp(String playerName) {
+        return playerLevel.getMaxExp(playerLevel.getPlayerName());
     }
 
     public int getMaxLevel() {
-        return playerLevel.getMaxLevel();
+        return SXLevel.getInstance().getConfiguration().getMaxLevel();
     }
 
     public void save() {

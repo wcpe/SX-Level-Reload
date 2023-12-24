@@ -25,15 +25,15 @@ public class Placeholders extends EZPlaceholderHook {
         if (string.equalsIgnoreCase("exp")) {
             d = playerLevel.getExp();
         } else if (string.equalsIgnoreCase("expPercentage")) {
-            if (playerLevel.getMaxExp() != 0) {
-                d = (double) playerLevel.getExp() / playerLevel.getMaxExp();
+            if (playerLevel.getMaxExp(player.getName()) != 0) {
+                d = (double) playerLevel.getExp() / playerLevel.getMaxExp(player.getName());
             }
         } else if (string.equalsIgnoreCase("maxExp")) {
-            d = playerLevel.getMaxExp();
+            d = playerLevel.getMaxExp(player.getName());
         } else if (string.equalsIgnoreCase("level")) {
             d = playerLevel.getLevel();
         } else if (string.equalsIgnoreCase("maxLevel")) {
-            d = playerLevel.getMaxLevel();
+            d = SXLevel.getInstance().getConfiguration().getMaxLevel();
         } else {
             return "§c变量填写错误";
         }
