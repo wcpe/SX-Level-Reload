@@ -1,16 +1,27 @@
 mysql: false
-update-default-exp: true
 #更新原版经验
-disabled-default-exp-change: false
+update-default-exp: true
+
 #禁止原版经验更改
+disabled-default-exp-change: false
+
 default-exp:
   enable: true
   value: 1.0
+
+#等级经验配置
+#等级:所需经验:所需权限
 level-sure-exp:
   - "5:500"
   - "10:1000:test"
   - "25:3000"
+#升级执行操作
 level-up-string-action:
   '5':
     - '成功升级至xxx'
     - '[TITLE]10;70;20; ;成功升级至xxx'
+#没有升级权限执行操作
+not-level-up-permission:
+  "10":
+    string-actions:
+      - '[TITLE]10;70;20; ;您当前无法升级'

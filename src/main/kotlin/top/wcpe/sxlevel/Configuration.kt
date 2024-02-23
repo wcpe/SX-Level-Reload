@@ -25,6 +25,8 @@ class Configuration(config: FileConfiguration) {
 
     val levelUpStringActionMap: Map<Int, List<String>>
 
+    val notLevelUpPermissionMap: Map<Int, List<String>>
+
     val maxLevel: Int
 
     init {
@@ -60,6 +62,18 @@ class Configuration(config: FileConfiguration) {
 
         }
         this.levelUpStringActionMap = levelUpStringActionMap
+
+        val notLevelUpPermissionMap = linkedMapOf<Int, List<String>>()
+        val notLevelUpPermission = config.getConfigurationSection("not-level-up-permission")
+        if (notLevelUpPermission != null) {
+
+            for (key in notLevelUpPermission.getKeys(false)) {
+                val stringAction = notLevelUpPermission.getStringList("$key.string-actions")
+                notLevelUpPermissionMap[key.toIntOrNull() ?: continue] = stringAction
+            }
+
+        }
+        this.notLevelUpPermissionMap = notLevelUpPermissionMap
     }
 
     data class LevelSureExp(

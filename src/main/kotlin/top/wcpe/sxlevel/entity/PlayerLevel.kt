@@ -27,7 +27,7 @@ import java.util.function.Consumer
  * @since  : v1.1.0-alpha-dev-1
  */
 data class PlayerLevel(
-    val playerName: String, var exp: Int = 0, var level: Int = 0
+    val playerName: String, var exp: Int = 0, var level: Int = 0,
 ) {
 
     private fun runPlayer(callBack: Consumer<Player>) {
@@ -276,6 +276,11 @@ data class PlayerLevel(
         for ((level, levelSureExp) in SXLevel.instance.configuration.levelSureExpMap) {
             tempLevelSureExp = levelSureExp
             if (playerFlag && levelSureExp.surePermission.isNotEmpty() && !playerExact.hasPermission(levelSureExp.surePermission)) {
+                SXLevel.instance.configuration.notLevelUpPermissionMap[level]?.let { stringActions ->
+                    SXLevel.instance.runTask {
+                        StringActionUtil.executionCommands(stringActions, false, playerExact)
+                    }
+                }
                 return 0
             }
 
