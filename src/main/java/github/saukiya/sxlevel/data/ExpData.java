@@ -54,11 +54,14 @@ public class ExpData {
         playerLevel.updateDefaultExp();
     }
 
+    @Deprecated
     public int getMaxExp() {
         return getMaxExp(playerLevel.getPlayerName());
     }
+
+    @Deprecated
     public int getMaxExp(String playerName) {
-        return playerLevel.getMaxExp(playerLevel.getPlayerName());
+        return playerLevel.getMaxExpValue(playerName);
     }
 
     public int getMaxLevel() {

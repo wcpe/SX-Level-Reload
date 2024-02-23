@@ -5,6 +5,7 @@ import github.saukiya.sxlevel.command.SenderType;
 import github.saukiya.sxlevel.command.SubCommand;
 import github.saukiya.sxlevel.util.Message;
 import lombok.val;
+import lombok.var;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
@@ -34,12 +35,14 @@ public class SetCommand extends SubCommand {
             sender.sendMessage(Message.getMsg(Message.ADMIN__SET_LEVEL, playerName, String.valueOf(level)));
         } else {
             int exp = Integer.parseInt(args[2].replaceAll(regex, ""));
-            val maxExp = playerLevel.getMaxExp(playerName);
+
+            var maxExp = playerLevel.getMaxExpValue(playerName);
+
             if (exp > maxExp) {
                 exp = maxExp;
             }
             playerLevel.setExp(exp);
-            sender.sendMessage(Message.getMsg(Message.ADMIN__SET_EXP, playerName, String.valueOf(exp), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp(playerName))));
+            sender.sendMessage(Message.getMsg(Message.ADMIN__SET_EXP, playerName, String.valueOf(exp), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExpValue(playerName))));
         }
         playerLevel.updateDefaultExp();
         playerLevel.save();

@@ -5,6 +5,7 @@ import github.saukiya.sxlevel.command.SenderType;
 import github.saukiya.sxlevel.command.SubCommand;
 import github.saukiya.sxlevel.util.Message;
 import lombok.val;
+import lombok.var;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
@@ -37,22 +38,22 @@ public class AddCommand extends SubCommand {
         add = Integer.parseInt(replaceInput);
         if (inputString.toLowerCase().contains("l")) {
             playerLevel.addLevel(add);
-            sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_LEVEL, playerName, String.valueOf(add), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp(playerName))));
+            sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_LEVEL, playerName, String.valueOf(add), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExpValue(playerName))));
         } else if (inputString.toLowerCase().contains("%")) {
-            val maxExp = playerLevel.getMaxExp(playerName);
+            var maxExp = playerLevel.getMaxExpValue(playerName);
             val exp = playerLevel.getExp();
             val b = (double) exp / maxExp * 100;
             if (b + add >= 100.0) {
                 playerLevel.addLevel(1);
-                sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_LEVEL, playerName, String.valueOf(1), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp(playerName))));
+                sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_LEVEL, playerName, String.valueOf(1), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExpValue(playerName))));
             } else {
                 int i = maxExp * add / 100;
                 playerLevel.addExp(i);
-                sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_EXP, playerName, String.valueOf(i), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp(playerName))));
+                sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_EXP, playerName, String.valueOf(i), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExpValue(playerName))));
             }
         } else {
             playerLevel.addExp(add);
-            sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_EXP, playerName, String.valueOf(add), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExp(playerName))));
+            sender.sendMessage(Message.getMsg(Message.ADMIN__ADD_EXP, playerName, String.valueOf(add), String.valueOf(playerLevel.getExp()), String.valueOf(playerLevel.getMaxExpValue(playerName))));
         }
 
     }

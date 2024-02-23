@@ -3,6 +3,7 @@ package top.wcpe.sxlevel
 import github.saukiya.sxlevel.SXLevel
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.entity.Player
+import top.wcpe.sxlevel.state.MaxExpResultState
 import java.text.DecimalFormat
 
 /**
@@ -42,18 +43,18 @@ class SXLevelPlaceholderExpansion : PlaceholderExpansion() {
         if (identifier.equals("exp", ignoreCase = true)) {
             d = playerLevel.exp.toDouble()
         } else if (identifier.equals("expPercentage", ignoreCase = true)) {
-            val maxExp = playerLevel.getMaxExp(player.name)
+            val maxExp = playerLevel.getMaxExpValue(player.name)
             if (maxExp != 0) {
                 d = playerLevel.exp.toDouble() / maxExp
             }
         } else if (identifier.equals("maxExp", ignoreCase = true)) {
-            d = playerLevel.getMaxExp(player.name).toDouble()
+            d = playerLevel.getMaxExpValue(player.name).toDouble()
         } else if (identifier.equals("level", ignoreCase = true)) {
             d = playerLevel.level.toDouble()
         } else if (identifier.equals("maxLevel", ignoreCase = true)) {
             d = SXLevel.instance.configuration.maxLevel.toDouble()
         } else if (identifier.equals("canUpLevel", ignoreCase = true)) {
-            return "${playerLevel.getMaxExp(player.name) != 0}"
+            return "${playerLevel.getMaxExpValue(player.name) != 0}"
         } else {
             return "§c变量填写错误"
         }

@@ -12,6 +12,7 @@ import org.bukkit.Sound
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import top.wcpe.sxlevel.Configuration
+import top.wcpe.sxlevel.state.MaxExpResultState
 import top.wcpe.wcpelib.bukkit.extend.plugin.runTask
 import top.wcpe.wcpelib.bukkit.utils.StringActionUtil
 import java.util.function.Consumer
@@ -94,7 +95,12 @@ data class PlayerLevel(
             if (tempHasExp > tempExp) {
                 tempHasExp -= tempExp
                 tempLevel--
-                tempExp = getMaxExp(playerName)
+                val maxExpResultState = getMaxExp(playerName)
+                tempExp = if (maxExpResultState is MaxExpResultState.Success) {
+                    maxExpResultState.value
+                } else {
+                    0
+                }
             } else {
                 return true
             }
@@ -108,7 +114,7 @@ data class PlayerLevel(
 
     fun takeExp(take: Int, vararg tipAdditionMessage: String) {
         var takeExp = take
-        val change: Int = takeExp
+        val change = takeExp
         while (takeExp > 0) {
             if (level <= 0 && takeExp > exp) {
                 exp = 0
@@ -117,7 +123,13 @@ data class PlayerLevel(
             if (takeExp > exp) {
                 takeExp -= exp
                 level--
-                exp = getMaxExp(playerName)
+
+                val maxExpResultState = getMaxExp(playerName)
+                exp = if (maxExpResultState is MaxExpResultState.Success) {
+                    maxExpResultState.value
+                } else {
+                    0
+                }
             } else {
                 exp -= takeExp
                 break
@@ -154,7 +166,11 @@ data class PlayerLevel(
 
         var addExp = 0
         for (i in 0 until addLevel) {
-            val maxExp = getMaxExp(playerName)
+            val maxExpResultState = getMaxExp(playerName)
+            if (maxExpResultState !is MaxExpResultState.Success) {
+                break
+            }
+            val maxExp = maxExpResultState.value
             if (maxExp == 0) {
                 break
             }
@@ -199,10 +215,22 @@ data class PlayerLevel(
         var tempAddExp = add
         var levelUp = false
         while (tempAddExp > 0) {
-            val maxExp = getMaxExp(playerName)
-            if (maxExp == 0) {
+            val maxExpResultState = getMaxExp(playerName)
+
+            if (maxExpResultState is MaxExpResultState.NotLevelUpPermission) {
+                runPlayer { player ->
+                    SXLevel.instance.configuration.notLevelUpPermissionMap[maxExpResultState.level]?.let { stringActions ->
+                        SXLevel.instance.runTask {
+                            StringActionUtil.executionCommands(stringActions, false, player)
+                        }
+                    }
+                }
                 break
             }
+            if (maxExpResultState !is MaxExpResultState.Success) {
+                break
+            }
+            val maxExp = maxExpResultState.value
             // 升级
             val totalExp = exp + tempAddExp
             if (totalExp >= maxExp) {
@@ -227,7 +255,7 @@ data class PlayerLevel(
         runPlayer {
             Message.send(
                 it, Message.getMsg(
-                    Message.PLAYER__EXP, level, exp, getMaxExp(playerName), "§e§l+$add", *tipAdditionMessage
+                    Message.PLAYER__EXP, level, exp, getMaxExpValue(playerName), "§e§l+$add", *tipAdditionMessage
                 )
             )
         }
@@ -251,8 +279,9 @@ data class PlayerLevel(
         runPlayer { player ->
             player.level = this.level
 
-            val maxExp = getMaxExp(playerName)
-            if (maxExp != 0) {
+            val maxExpResultState = getMaxExp(playerName)
+            if (maxExpResultState is MaxExpResultState.Success) {
+                val maxExp = maxExpResultState.value
                 if (maxExp < exp) {
                     player.exp = 1.0f
                 } else {
@@ -264,9 +293,17 @@ data class PlayerLevel(
         }
     }
 
-    fun getMaxExp(playerName: String): Int {
-        if (SXLevel.instance.configuration.maxLevel <= level) {
-            return 0
+    fun getMaxExpValue(playerName: String): Int {
+        val maxExpResultState = getMaxExp(playerName)
+        if (maxExpResultState is MaxExpResultState.Success) {
+            return maxExpResultState.value
+        }
+        return 0
+    }
+
+    fun getMaxExp(playerName: String): MaxExpResultState {
+        if (level >= SXLevel.instance.configuration.maxLevel) {
+            return MaxExpResultState.MaxLevel
         }
 
         val playerExact = Bukkit.getPlayerExact(playerName)
@@ -276,19 +313,15 @@ data class PlayerLevel(
         for ((level, levelSureExp) in SXLevel.instance.configuration.levelSureExpMap) {
             tempLevelSureExp = levelSureExp
             if (playerFlag && levelSureExp.surePermission.isNotEmpty() && !playerExact.hasPermission(levelSureExp.surePermission)) {
-                SXLevel.instance.configuration.notLevelUpPermissionMap[level]?.let { stringActions ->
-                    SXLevel.instance.runTask {
-                        StringActionUtil.executionCommands(stringActions, false, playerExact)
-                    }
-                }
-                return 0
+                return MaxExpResultState.NotLevelUpPermission(level)
             }
 
             if (this.level <= level) {
                 break
             }
         }
-        return tempLevelSureExp?.sureExp ?: 0
+        val sureExp = tempLevelSureExp?.sureExp ?: return MaxExpResultState.Fail
+        return MaxExpResultState.Success(sureExp)
     }
 
     fun save() {
